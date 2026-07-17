@@ -1,0 +1,300 @@
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --tblr-primary: #146654 !important;
+    --tblr-primary-rgb: 20, 102, 84 !important;
+    --tblr-font-sans-serif: 'Inter', sans-serif !important;
+  }
+  body { font-family: var(--tblr-font-sans-serif); -webkit-font-smoothing: antialiased; background-color: #f8fafc;}
+  /* ==========================================
+     ÉP MÀU NỀN XANH CHỮ TRẮNG CHO TIÊU ĐỀ BẢNG
+     ========================================== */
+  .table-responsive table thead th, table.table thead th {
+    background-color: #146654 !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    border-bottom: 0 !important;
+    padding-top: 14px !important;
+    padding-bottom: 14px !important;
+  }
+  /* CUSTOM SIDEBAR & MENU */
+  .nav-link.active { color: #146654 !important; font-weight: 600; }
+  .navbar-brand span { color: #146654 !important; }
+  
+  /* NÚT BẤM */
+  .btn-brand { background-color: #146654 !important; color: white !important; font-weight: 600; }
+  .btn-brand:hover { background-color: #0f4f41 !important; color: white !important;}
+
+  /* TRANG ĐĂNG NHẬP */
+  .login-background { background: linear-gradient(135deg, #185a4e 0%, #173238 100%); min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+  .login-card { background: #f8fbfa; border-radius: 12px; box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2); width: 100%; max-width: 420px; padding: 10px; }
+
+/* =================================================== */
+/* THEME MASTER SANG TRỌNG CAO CẤP (SIDEBAR & TOPBAR)  */
+/* =================================================== */
+
+:root {
+  --sidebar-bg: #0f172a;       /* Màu xanh Slate tối của các app SaaS cao cấp */
+  --sidebar-text: #94a3b8;     /* Chữ xám dịu mắt chống mỏi khi cày sale */
+  --sidebar-hover-bg: rgba(255, 255, 255, 0.04);
+  --brand-gradient: linear-gradient(135deg, #146654 0%, #0d4639 100%);
+  --topbar-blur-bg: rgba(255, 255, 255, 0.85);
+}
+
+/* 1. NÂNG CẤP MENU TRÁI (SIDEBAR VERTICAL) */
+.navbar-vertical {
+  background-color: var(--sidebar-bg) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 4px 0 24px rgba(15, 23, 42, 0.15) !important;
+  padding-top: 10px;
+}
+
+.navbar-vertical .navbar-brand {
+  padding: 20px 24px !important;
+  font-size: 20px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.5px;
+  background: linear-gradient(120deg, #2ae1b2, #ffffff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 15px;
+}
+
+.navbar-vertical .nav-item {
+  margin: 4px 12px !important;
+}
+
+.navbar-vertical .nav-link {
+  color: var(--sidebar-text) !important;
+  font-weight: 500 !important;
+  font-size: 13.5px !important;
+  padding: 10px 16px !important;
+  border-radius: 8px !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.navbar-vertical .nav-link:hover {
+  color: #ffffff !important;
+  background-color: var(--sidebar-hover-bg) !important;
+  transform: translateX(4px);
+}
+
+.navbar-vertical .nav-link .nav-link-icon {
+  color: #64748b !important;
+  font-size: 19px !important;
+  transition: color 0.25s !important;
+}
+.navbar-vertical .nav-link:hover .nav-link-icon {
+  color: #2ae1b2 !important; 
+}
+
+/* HIỆU ỨNG TRẠNG THÁI ACTIVE */
+.navbar-vertical .nav-item.active .nav-link,
+.navbar-vertical .nav-link.active {
+  color: #ffffff !important;
+  background: var(--brand-gradient) !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 12px rgba(20, 102, 84, 0.3) !important;
+}
+.navbar-vertical .nav-item.active .nav-link .nav-link-icon,
+.navbar-vertical .nav-link.active .nav-link-icon {
+  color: #ffffff !important;
+}
+
+/* 2. NÂNG CẤP THANH TOPBAR THƯỢNG LƯU */
+#global-topbar {
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  background: var(--topbar-blur-bg) !important;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.015), 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+  height: 64px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.badge-live-status {
+  background: rgba(16, 185, 129, 0.1) !important;
+  color: #059669 !important;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 6px;
+  font-weight: 600;
+  padding: 6px 12px !important;
+}
+
+.user-profile-anchor {
+  padding: 6px 12px;
+  border-radius: 10px;
+  transition: background-color 0.2s;
+}
+.user-profile-anchor:hover {
+  background-color: rgba(15, 23, 42, 0.04);
+  text-decoration: none;
+}
+.user-avatar-premium {
+  border: 2px solid #146654;
+  box-shadow: 0 0 0 2px rgba(20, 102, 84, 0.15);
+  transition: transform 0.2s;
+}
+.user-profile-anchor:hover .user-avatar-premium {
+  transform: scale(1.05);
+}
+/* =================================================== */
+/* FIX LỖI UI: ĐẨY LỀ TRÁI CHO THẺ SELECT KHI CÓ ICON  */
+/* =================================================== */
+.input-icon .form-select {
+  padding-left: 2.75rem !important; /* Lùi text sang phải chừa không gian cho Icon */
+}
+
+/* (Tùy chọn thêm) Căn chỉnh lại icon một chút để nó nằm ngay ngắn giữa ô */
+.input-icon-addon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+}
+/* =================================================== */
+/* TỐI ƯU HÓA TRẢI NGHIỆM ĐA MÀN HÌNH (MOBILE RESPONSIVE) */
+/* =================================================== */
+@media (max-width: 991.98px) {
+  /* 1. Thu gọn Sidebar thành Topbar ngang trên Mobile */
+  .navbar-vertical {
+    min-height: auto !important;
+    padding: 12px 16px !important;
+    position: sticky;
+    top: 0;
+    z-index: 1050;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Dàn hàng ngang cho Logo và Nút bấm */
+  .navbar-vertical .container-fluid {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0;
+  }
+
+  .navbar-vertical .navbar-brand {
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+  }
+
+  /* FIX TRIỆT ĐỂ: ÉP NÚT HAMBURGER HIỂN THỊ MÀU TRẮNG */
+  .navbar-toggler {
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 6px;
+    padding: 6px 10px !important;
+    background: transparent !important;
+  }
+  
+  /* Bơm trực tiếp mã SVG 3 gạch màu trắng nguyên bản (rgba 255,255,255) để chống tàng hình */
+  .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.95%29' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+  }
+
+  /* Định hình Dropdown Menu trượt xuống */
+  #sidebar-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: var(--sidebar-bg); /* #0f172a */
+    padding: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+  }
+}
+/* =================================================== */
+/* GIAO DIỆN KANBAN BOARD (QUIET LUXURY)               */
+/* =================================================== */
+.kanban-wrapper {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding-bottom: 16px;
+  min-height: 650px;
+}
+
+.kanban-wrapper::-webkit-scrollbar { height: 6px; }
+.kanban-wrapper::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+.kanban-column {
+  flex: 1;
+  min-width: 320px;
+  background: #f8fafc;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e2e8f0;
+}
+
+.kanban-header {
+  padding: 16px;
+  border-bottom: 2px solid transparent;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.kanban-title {
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.kanban-count {
+  background: white;
+  color: #475569;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.kanban-body {
+  padding: 12px;
+  flex-grow: 1;
+  overflow-y: auto;
+  min-height: 150px; /* Vùng an toàn để thả thẻ vào cột rỗng */
+}
+
+/* Thẻ Khách Hàng (Card) */
+.kanban-card {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  cursor: grab;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.kanban-card:hover {
+  box-shadow: 0 6px 12px rgba(0,0,0,0.06);
+  border-color: #cbd5e1;
+}
+
+.kanban-card:active {
+  cursor: grabbing;
+}
+
+/* Hiệu ứng khi đang kéo thẻ (SortableJS Ghost) */
+.sortable-ghost {
+  opacity: 0.4;
+  background: #f1f5f9;
+  border: 2px dashed #146654;
+}
