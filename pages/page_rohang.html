@@ -1,0 +1,409 @@
+<style>
+  .filter-bar { background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--tblr-border-color); }
+  .property-code { font-weight: 700; color: #146654; font-size: 14px; letter-spacing: 0.5px; }
+  .price-text { font-weight: 700; color: #e11d48; }
+</style>
+
+<div class="page-header d-print-none mt-4">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <h2 class="page-title" style="color: var(--tblr-primary); font-weight: 700;">
+          <i class="ti ti-home-check me-2"></i> Rổ Hàng Ký Gửi
+        </h2>
+        <div class="text-muted mt-1" style="font-size: 13px;">Quản lý danh sách sản phẩm (căn hộ, mặt bằng) đang chào thuê/bán</div>
+      </div>
+      <div class="col-auto ms-auto d-print-none">
+        <button class="btn btn-brand d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modal-property" onclick="openPropertyModal()">
+          <i class="ti ti-plus"></i> Thêm Sản Phẩm
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="container-xl">
+    
+    <div class="filter-bar row g-2">
+      <div class="col-md-3">
+        <div class="input-icon">
+          <span class="input-icon-addon"><i class="ti ti-search"></i></span>
+          <input type="text" id="filterPropSearch" class="form-control" placeholder="Mã căn, loại SP..." onkeyup="applyPropFilter()">
+        </div>
+      </div>
+      <div class="col-md-2">
+        <select id="filterPropType" class="form-select" onchange="applyPropFilter()">
+          <option value="all">Tất cả Loại</option>
+          <option value="Căn hộ">Căn hộ</option>
+          <option value="Mặt bằng">Mặt bằng</option>
+          <option value="Nhà phố">Nhà phố</option>
+          <option value="Shophouse">Shophouse</option>
+          <option value="Biệt thự">Biệt thự</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <select id="filterPropProject" class="form-select" onchange="applyPropFilter()">
+          <option value="all">Tất cả Dự án</option>
+          <option value="none">-- Không thuộc dự án --</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select id="filterPropStatus" class="form-select" onchange="applyPropFilter()">
+          <option value="all">Tất cả Trạng thái</option>
+          <option value="Available">Trống (Sẵn sàng)</option>
+          <option value="Rented">Đã cho thuê</option>
+          <option value="Suspended">Tạm ngưng</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2" onclick="resetPropFilter()">
+          <i class="ti ti-refresh"></i> Tải lại
+        </button>
+      </div>
+    </div>
+
+    <div class="card" style="border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); overflow: hidden;">
+      <div class="table-responsive">
+        <table class="table table-vcenter card-table table-hover text-nowrap">
+          <thead>
+            <tr>
+              <th class="w-1 text-center">STT</th>
+              <th>MÃ SẢN PHẨM</th>
+              <th>CHỦ NHÀ (OWNER)</th>
+              <th>DỰ ÁN</th>
+              <th>MỨC GIÁ</th>
+              <th>TRẠNG THÁI</th>
+              <th class="text-center">THAO TÁC</th>
+            </tr>
+          </thead>
+          <tbody id="propertyTableBody">
+            <tr><td colspan="7" class="text-center text-muted py-4">Đang tải dữ liệu từ máy chủ...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="paginationPropControls" class="card-footer d-flex align-items-center" style="background: #fff;"></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="modal modal-blur fade" id="modal-property" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content" style="border-radius: 12px; overflow: hidden;">
+      <div class="modal-header" style="background: #146654; color: white;">
+        <h5 class="modal-title" id="modalTitleProperty" style="font-weight: 700;">Thêm Sản Phẩm Mới</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" id="btnClosePropertyModal"></button>
+      </div>
+      <form id="propertyForm" onsubmit="event.preventDefault(); saveProperty();">
+        <div class="modal-body p-4">
+          <input type="hidden" id="propertyId">
+          
+          <div class="mb-3">
+            <h3 class="fw-bold" style="color: #146654; font-size: 15px; letter-spacing: 0.3px;"><i class="ti ti-home-2 me-2"></i>Định Danh Sản Phẩm BĐS</h3>
+            <hr class="mt-2 mb-0" style="border-color: #cbd5e1; opacity: 0.5;">
+          </div>
+
+          <div class="row gx-3">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-medium required" style="font-size: 13px; color: #475569;">Mã Sản Phẩm / Tên Căn</label>
+              <div class="input-icon">
+                <span class="input-icon-addon"><i class="ti ti-hash text-muted"></i></span>
+                <input type="text" id="propCode" class="form-control form-control-lg fs-4" required placeholder="VD: A1-05, MB-205..." style="border-radius: 8px; border-color: #cbd5e1;">
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-medium required" style="font-size: 13px; color: #475569;">Loại Bất Động Sản</label>
+              <div class="input-icon">
+                <span class="input-icon-addon"><i class="ti ti-category text-muted"></i></span>
+                <select id="propType" class="form-select form-select-lg fs-4" style="border-radius: 8px; border-color: #cbd5e1; font-weight: 500;">
+                  <option value="Căn hộ">🏢 Căn hộ</option>
+                  <option value="Mặt bằng">🏬 Mặt bằng</option>
+                  <option value="Nhà phố">🏡 Nhà phố</option>
+                  <option value="Shophouse">🏪 Shophouse</option>
+                  <option value="Biệt thự">🏰 Biệt thự</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-medium" style="font-size: 13px; color: #475569;">Thuộc Dự Án (Nếu có)</label>
+            <div class="input-icon">
+              <span class="input-icon-addon"><i class="ti ti-building-skyscraper text-muted"></i></span>
+              <select id="propProject" class="form-select form-select-lg fs-4" style="border-radius: 8px; border-color: #cbd5e1; font-weight: 500;">
+                <option value="">-- Không thuộc dự án nào (Nhà riêng lẻ) --</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-3 mt-4">
+            <h3 class="fw-bold" style="color: #146654; font-size: 15px; letter-spacing: 0.3px;"><i class="ti ti-coin me-2"></i>Thông Tin Giao Dịch & Sở Hữu</h3>
+            <hr class="mt-2 mb-0" style="border-color: #cbd5e1; opacity: 0.5;">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-medium required" style="font-size: 13px; color: #475569;">Chọn Chủ Nhà (Đối tác ký gửi)</label>
+            <div class="input-icon">
+              <span class="input-icon-addon"><i class="ti ti-user-check text-success"></i></span>
+              <select id="propOwner" class="form-select form-select-lg fs-4" required style="border-radius: 8px; border-color: #cbd5e1; font-weight: 500;">
+                <option value="">-- Chọn khách hàng ký gửi từ hệ thống --</option>
+              </select>
+            </div>
+            <div class="form-hint mt-1 text-muted" style="font-size: 11px;"><i class="ti ti-info-circle me-1"></i>Hệ thống lọc tự động thông minh: Chỉ hiển thị những khách hàng thuộc nhóm "Chủ nhà".</div>
+          </div>
+
+          <div class="row gx-3">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-medium required" style="font-size: 13px; color: #475569;">Giá Thuê / Bán mong muốn</label>
+              <div class="input-icon">
+                <span class="input-icon-addon"><i class="ti ti-currency-dong text-danger fw-bold" style="font-size: 15px;">đ</i></span>
+                <input type="text" id="propPrice" class="form-control form-control-lg fs-4 fw-bold text-danger" required placeholder="VD: 15 triệu/tháng, 3.2 tỷ..." style="border-radius: 8px; border-color: #cbd5e1; padding-left: 35px;">
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-medium required" style="font-size: 13px; color: #475569;">Trạng thái hiện tại</label>
+              <div class="input-icon">
+                <span class="input-icon-addon"><i class="ti ti-circle-dot text-primary"></i></span>
+                <select id="propStatus" class="form-select form-select-lg fs-4 fw-medium" style="border-radius: 8px; border-color: #cbd5e1;">
+                  <option value="Available" style="color: #2fb344; font-weight: bold;">🟢 Trống (Sẵn sàng giao dịch)</option>
+                  <option value="Rented" style="color: #d63384;">🔴 Đã cho thuê / Đã bán</option>
+                  <option value="Suspended" style="color: #6c7a89;">⚫ Tạm ngưng giao dịch</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3 mt-4">
+            <h3 class="fw-bold" style="color: #146654; font-size: 15px; letter-spacing: 0.3px;"><i class="ti ti-lock-square text-muted me-2"></i>Thông Tin Ghi Chú & Bảo Mật</h3>
+            <hr class="mt-2 mb-3" style="border-color: #cbd5e1; opacity: 0.5;">
+          </div>
+          <div class="mb-2">
+            <label class="form-label fw-medium text-muted" style="font-size: 12px;">Đặc điểm nội thất / Mã số pass cửa / Ghi chú bàn giao...</label>
+            <textarea id="propNotes" class="form-control" rows="3" placeholder="Nhập mật mã hòm thư, pass cửa kỹ thuật, tình trạng bàn giao điều hòa, tivi, sofa hoặc các thỏa thuận đặc quyền nội bộ khác..." style="border-radius: 8px; resize: none; background: #f8fafc; border: 1px dashed #94a3b8; padding: 14px; color: #1e293b; font-size: 13.5px;"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer d-flex align-items-center" style="background: #f1f5f9; border-radius: 0 0 12px 12px; border-top: 1px solid #e2e8f0; padding: 16px 24px;">
+          <button type="button" class="btn btn-link link-secondary fw-medium text-decoration-none" data-bs-dismiss="modal">Hủy bỏ</button>
+          
+          <button type="submit" class="btn btn-primary ms-auto d-flex align-items-center gap-2" id="btnSaveProperty" style="background: linear-gradient(135deg, #146654 0%, #0d4639 100%); border: none; box-shadow: 0 4px 12px rgba(20, 102, 84, 0.25); border-radius: 8px; padding: 10px 24px; font-weight: 600; letter-spacing: 0.5px;">
+            <i class="ti ti-device-floppy fs-3"></i> Lưu sản phẩm vào rổ
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  let globalProperties = [];
+  let globalOwners = []; 
+  let globalProjectsForProp = []; 
+  
+  // BIẾN QUẢN LÝ PHÂN TRANG RỔ HÀNG
+  let propCurrentPage = 1;
+  const propItemsPerPage = 20; 
+  let propTotalItems = 0;
+  let propSearchTimeout = null;
+
+  // 1. TẢI DỮ LIỆU ĐỆM
+  async function loadPropInitialData() {
+    const { data: oData } = await window.sbClient.from('customers').select('id, full_name, phone').eq('customer_group', 'Owner');
+    if (oData) {
+      globalOwners = oData;
+      let options = '<option value="">-- Chọn Chủ nhà --</option>';
+      oData.forEach(owner => options += `<option value="${owner.id}">${owner.full_name} (${owner.phone})</option>`);
+      document.getElementById('propOwner').innerHTML = options;
+    }
+
+    const { data: pData } = await window.sbClient.from('projects').select('id, project_name');
+    if (pData) {
+      globalProjectsForProp = pData;
+      let pOptions = '<option value="">-- Không thuộc dự án nào --</option>';
+      let fOptions = '<option value="all">Tất cả Dự án</option><option value="none">-- Không thuộc dự án --</option>';
+      pData.forEach(p => {
+        pOptions += `<option value="${p.id}">${p.project_name}</option>`;
+        fOptions += `<option value="${p.id}">${p.project_name}</option>`;
+      });
+      document.getElementById('propProject').innerHTML = pOptions;
+      document.getElementById('filterPropProject').innerHTML = fOptions;
+    }
+  }
+
+  // 2. TẢI DANH SÁCH RỔ HÀNG (MÃ SERVER-SIDE PAGINATION TOÀN DIỆN)
+  async function loadProperties() {
+    if (globalOwners.length === 0) await loadPropInitialData();
+    
+    document.getElementById('propertyTableBody').innerHTML = '<tr><td colspan="7" class="text-center py-4"><span class="spinner-border spinner-border-sm me-2"></span> Đang tải dữ liệu...</td></tr>';
+
+    const from = (propCurrentPage - 1) * propItemsPerPage;
+    const to = from + propItemsPerPage - 1;
+
+    let query = window.sbClient.from('properties').select('*', { count: 'exact' });
+
+    // Đọc giá trị bộ lọc
+    const keyword = document.getElementById('filterPropSearch').value.trim().toLowerCase();
+    const type = document.getElementById('filterPropType').value;
+    const project = document.getElementById('filterPropProject').value;
+    const status = document.getElementById('filterPropStatus').value;
+
+    if (keyword) query = query.or(`property_code.ilike.%${keyword}%,property_type.ilike.%${keyword}%`);
+    if (type !== 'all') query = query.eq('property_type', type);
+    if (status !== 'all') query = query.eq('status', status);
+    
+    if (project !== 'all') {
+      if (project === 'none') query = query.is('project_id', null);
+      else query = query.eq('project_id', project);
+    }
+
+    const { data, error, count } = await query.order('created_at', { ascending: false }).range(from, to);
+    if (error) { Swal.fire('Lỗi', error.message, 'error'); return; }
+
+    globalProperties = data;
+    propTotalItems = count || 0;
+    
+    renderPropertyTable(data);
+    renderPropPagination();
+  }
+
+  // 3. RENDER BẢNG
+  function renderPropertyTable(dataList) {
+    const tbody = document.getElementById('propertyTableBody');
+    tbody.innerHTML = '';
+    if(dataList.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4">Chưa có sản phẩm nào trong rổ hàng.</td></tr>'; return;
+    }
+
+    dataList.forEach((prop, index) => {
+      const owner = globalOwners.find(o => o.id === prop.owner_id);
+      const ownerName = owner ? `<span class="text-primary fw-medium">${owner.full_name}</span> <br><span class="text-muted" style="font-size:11px">${owner.phone}</span>` : '<span class="text-danger">Chưa rõ</span>';
+      
+      const project = globalProjectsForProp.find(p => p.id === prop.project_id);
+      const projectName = project ? project.project_name : '<span class="text-muted">Nhà phố/Lẻ</span>';
+
+      let statusHtml = '';
+      if (prop.status === 'Available') statusHtml = '<span class="badge bg-green-lt fw-bold border border-success"><i class="ti ti-check me-1"></i> Trống</span>';
+      else if (prop.status === 'Rented') statusHtml = '<span class="badge bg-red-lt"><i class="ti ti-lock me-1"></i> Đã Thuê/Bán</span>';
+      else statusHtml = '<span class="badge bg-secondary-lt">Tạm ngưng</span>';
+
+      const stt = (propCurrentPage - 1) * propItemsPerPage + index + 1;
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="text-center text-muted">${stt}</td>
+        <td>
+          <div class="property-code">${prop.property_code}</div>
+          <div class="text-muted" style="font-size: 12px;">${prop.property_type || '-'}</div>
+        </td>
+        <td>${ownerName}</td>
+        <td class="text-muted">${projectName}</td>
+        <td class="price-text">${prop.rental_price || 'Thỏa thuận'}</td>
+        <td>${statusHtml}</td>
+        <td class="text-center">
+          <div class="d-flex justify-content-center align-items-center gap-2">
+            <button class="btn btn-sm btn-outline-primary p-2 px-3 me-1" data-bs-toggle="modal" data-bs-target="#modal-property" onclick="openPropertyModal('${prop.id}')"><i class="ti ti-pencil"></i> Sửa</button>
+            ${window.currentUser.role === 'admin' ? `<button class="btn btn-sm btn-outline-danger p-2 px-3" onclick="deleteProperty('${prop.id}')"><i class="ti ti-trash"></i></button>` : ''}
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // THANH PHÂN TRANG RỔ HÀNG
+  function renderPropPagination() {
+    const totalPages = Math.ceil(propTotalItems / propItemsPerPage) || 1;
+    const paginationEl = document.getElementById('paginationPropControls');
+    if (propTotalItems === 0) { paginationEl.innerHTML = ''; return; }
+    
+    const fromCount = (propCurrentPage - 1) * propItemsPerPage + 1;
+    const toCount = Math.min(propCurrentPage * propItemsPerPage, propTotalItems);
+
+    paginationEl.innerHTML = `
+      <span class="text-muted">Hiển thị <strong>${fromCount}</strong> - <strong>${toCount}</strong> / <strong>${propTotalItems}</strong> sản phẩm</span>
+      <div class="btn-group ms-auto">
+        <button class="btn btn-sm btn-outline-secondary" onclick="changePropPage(-1)" ${propCurrentPage === 1 ? 'disabled' : ''}><i class="ti ti-chevron-left"></i> Trước</button>
+        <button class="btn btn-sm btn-outline-secondary" disabled style="color: var(--tblr-primary); font-weight: bold;">Trang ${propCurrentPage} / ${totalPages}</button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="changePropPage(1)" ${propCurrentPage === totalPages ? 'disabled' : ''}>Sau <i class="ti ti-chevron-right"></i></button>
+      </div>
+    `;
+  }
+
+  function changePropPage(direction) { propCurrentPage += direction; loadProperties(); }
+
+  function applyPropFilter() {
+    clearTimeout(propSearchTimeout);
+    propSearchTimeout = setTimeout(() => {
+      propCurrentPage = 1;
+      loadProperties();
+    }, 500);
+  }
+
+  function resetPropFilter() {
+    document.getElementById('filterPropSearch').value = ''; 
+    document.getElementById('filterPropType').value = 'all';
+    document.getElementById('filterPropProject').value = 'all'; 
+    document.getElementById('filterPropStatus').value = 'all';
+    propCurrentPage = 1;
+    loadProperties();
+  }
+
+  function openPropertyModal(id = null) {
+    document.getElementById('propertyForm').reset();
+    document.getElementById('propertyId').value = '';
+    
+    if (id) {
+      document.getElementById('modalTitleProperty').innerHTML = '<i class="ti ti-edit me-2"></i> Cập nhật Thông Tin Sản Phẩm';
+      const prop = globalProperties.find(p => p.id === id);
+      document.getElementById('propertyId').value = prop.id;
+      document.getElementById('propCode').value = prop.property_code;
+      document.getElementById('propType').value = prop.property_type || 'Căn hộ';
+      document.getElementById('propOwner').value = prop.owner_id || '';
+      document.getElementById('propProject').value = prop.project_id || '';
+      document.getElementById('propPrice').value = prop.rental_price || '';
+      document.getElementById('propStatus').value = prop.status || 'Available';
+      document.getElementById('propNotes').value = prop.notes || '';
+    } else {
+      document.getElementById('modalTitleProperty').innerHTML = '<i class="ti ti-plus me-2"></i> Thêm Sản Phẩm Ký Gửi Mới';
+    }
+  }
+
+  async function saveProperty() {
+    const btn = document.getElementById('btnSaveProperty');
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang xử lý...'; btn.disabled = true;
+    
+    const id = document.getElementById('propertyId').value;
+    let finalProjectId = document.getElementById('propProject').value;
+    if (finalProjectId === "") finalProjectId = null;
+
+    const payload = {
+      property_code: document.getElementById('propCode').value,
+      property_type: document.getElementById('propType').value,
+      owner_id: document.getElementById('propOwner').value,
+      project_id: finalProjectId,
+      rental_price: document.getElementById('propPrice').value,
+      status: document.getElementById('propStatus').value,
+      notes: document.getElementById('propNotes').value || null
+    };
+
+    try {
+      if (id) await window.sbClient.from('properties').update(payload).eq('id', id);
+      else await window.sbClient.from('properties').insert([payload]);
+      
+      document.getElementById('btnClosePropertyModal').click();
+      Swal.fire({ icon: 'success', title: 'Thành công', timer: 1500, showConfirmButton: false });
+      await loadProperties();
+    } catch (err) { Swal.fire({ icon: 'error', title: 'Lỗi', text: err.message, confirmButtonColor: '#146654' }); } 
+    finally { btn.innerHTML = '<i class="ti ti-device-floppy me-2"></i> Lưu sản phẩm'; btn.disabled = false; }
+  }
+
+  function deleteProperty(id) {
+    Swal.fire({ title: 'Xóa sản phẩm này?', text: "Hành động này không thể hoàn tác!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Xóa' })
+    .then(async (res) => {
+      if (res.isConfirmed) {
+        await window.sbClient.from('properties').delete().eq('id', id);
+        Swal.fire({ icon: 'success', title: 'Đã xóa', timer: 1500, showConfirmButton: false });
+        loadProperties();
+      }
+    });
+  }
+</script>
