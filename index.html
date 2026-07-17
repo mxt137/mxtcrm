@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MXT HUB CRM</title>
+  
+  <!-- Nạp thư viện dùng chung từ Style_CRM.html cũ -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@latest/dist/css/tabler.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  
+  <!-- Nạp CSS tùy chỉnh của hệ thống mang tone xanh ngọc #146654 -->
+  <link rel="stylesheet" href="css/style_crm.css">
+</head>
+<body>
+
+  <!-- Khung chứa màn hình Đăng nhập -->
+  <div id="screen-login" style="display: none;"></div>
+
+  <!-- Khung chứa Ứng dụng chính -->
+  <div id="screen-app" class="page" style="display: none;">
+    
+    <!-- Sidebar Menu (Giữ nguyên cấu trúc HTML của anh từ bản cũ) -->
+    <aside class="navbar navbar-vertical navbar-expand-lg navbar-dark">
+      <div class="container-fluid">
+        <h1 class="navbar-brand navbar-brand-autodark mt-lg-3">
+          <span style="font-size: 24px; font-weight: 800; letter-spacing: 1px;">
+            <i class="ti ti-chart-pie-filled" style="color: #2ae1b2;"></i> MXT HUB
+          </span>
+        </h1>
+        <div class="collapse navbar-collapse mt-lg-4" id="sidebar-menu">
+          <ul class="navbar-nav pt-lg-3 w-100">
+            <li class="nav-item"><a class="nav-link nav-menu active" id="nav-dashboard" onclick="switchPage('dashboard')" style="cursor: pointer;"><i class="ti ti-layout-dashboard me-2 fs-2 nav-link-icon"></i> Tổng quan</a></li>
+            <li class="nav-item"><a class="nav-link nav-menu" id="nav-member" onclick="switchPage('member')" style="cursor: pointer;"><i class="ti ti-users me-2 fs-2 nav-link-icon"></i> Thành viên</a></li>
+            <!-- Các menu khác thêm vào đây tương tự... -->
+          </ul>
+        </div>
+      </div>
+    </aside>
+
+    <div class="page-wrapper">
+      <header id="global-topbar"></header>
+      
+      <!-- CÁC MODULE SẼ ĐƯỢC JAVASCRIPT FETCH VÀ BƠM VÀO ĐÂY -->
+      <div id="module-dashboard" class="app-module" style="display: none;"></div>
+      <div id="module-member" class="app-module" style="display: none;"></div>
+      <!-- Các module rổ hàng, dự án... -->
+    </div>
+  </div>
+
+  <!-- Nạp thư viện logic -->
+  <script src="https://cdn.jsdelivr.net/npm/@tabler/core@latest/dist/js/tabler.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Nạp các file Logic JavaScript cốt lõi -->
+  <script src="js/app.js"></script>
+  <script src="js/page_login.js"></script>
+  <script src="js/page_dashboard.js"></script>
+  <script src="js/page_member.js"></script>
+</body>
+</html>
