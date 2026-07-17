@@ -1,0 +1,71 @@
+<div class="login-background w-100">
+  <div class="mb-4 d-flex align-items-center">
+    <span style="font-size: 32px; font-weight: 700; color: white;">CRM</span>
+    <span class="login-logo-box">SYSTEM</span>
+  </div>
+
+  <div class="card login-card">
+    <div class="card-body p-4">
+      <h2 class="text-center mb-4" style="color: #146654; font-weight: 700;">ĐĂNG NHẬP</h2>
+      <form onsubmit="event.preventDefault(); processLogin();">
+        <div class="mb-3">
+          <label class="form-label" style="font-weight: 600; font-size: 12px;">Tài khoản</label>
+          <div class="input-icon">
+            <span class="input-icon-addon"><i class="ti ti-user" style="color: #146654;"></i></span>
+            <input type="email" id="loginEmail" class="form-control form-control-lg" placeholder="Username của bạn..." required>
+          </div>
+        </div>
+        <div class="mb-4">
+          <label class="form-label" style="font-weight: 600; font-size: 12px;">Mật khẩu</label>
+          <div class="input-icon">
+            <span class="input-icon-addon"><i class="ti ti-lock" style="color: #146654;"></i></span>
+            <input type="password" id="loginPass" class="form-control form-control-lg" placeholder="Mật khẩu..." required>
+          </div>
+        </div>
+        <button type="submit" id="btnLogin" class="btn btn-brand btn-lg w-100">VÀO HỆ THỐNG <i class="ti ti-login-2 ms-2"></i></button>
+      </form>
+    </div>
+  </div>
+    <div class="text-center text-white-50 mt-4 small">
+      <i class="ti ti-shield-lock me-1"></i> Bản quyền & phát triển bởi Mai Xuân Thành - 090 5555 628.
+    </div>
+</div>
+
+<script>
+  async function processLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass = document.getElementById('loginPass').value.trim();
+    const btn = document.getElementById('btnLogin');
+    
+    if (!email || !pass) {
+      Swal.fire({ icon: 'warning', title: 'Lưu ý', text: 'Vui lòng nhập đầy đủ Email và Mật khẩu!', confirmButtonColor: '#146654' });
+      return;
+    }
+
+    btn.disabled = true; 
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>ĐANG XÁC THỰC...';
+    
+    try {
+      const { data, error } = await window.sbClient.rpc('login_user', { user_email: email, user_password: pass });
+      if (error) throw new Error(error.message);
+      if (!data) throw new Error('Sai tài khoản hoặc mật khẩu!');
+
+      localStorage.setItem('crm_session', JSON.stringify(data));
+      window.currentUser = data;
+      
+      if(typeof renderTopbar === 'function') renderTopbar();
+      
+      document.getElementById('screen-login').style.display = 'none';
+      document.getElementById('screen-app').style.display = 'block';
+      if(typeof switchPage === 'function') switchPage('dashboard');
+
+      btn.disabled = false; 
+      btn.innerHTML = 'VÀO HỆ THỐNG <i class="ti ti-login-2 ms-2"></i>';
+      
+    } catch (err) {
+      Swal.fire({ icon: 'error', title: 'Lỗi đăng nhập', text: err.message, confirmButtonColor: '#146654' });
+      btn.disabled = false; 
+      btn.innerHTML = 'VÀO HỆ THỐNG <i class="ti ti-login-2 ms-2"></i>';
+    }
+  }
+</script>
