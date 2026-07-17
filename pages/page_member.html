@@ -222,37 +222,29 @@
     }
   }
 
-  // 3. LƯU (THÊM HOẶC CẬP NHẬT)
+  // 3. LƯU (THÊM HOẶC CẬP NHẬT) QUA RPC BẢO MẬT
   async function saveMember() {
     const btn = document.getElementById('btnSaveMember');
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang lưu...'; 
     btn.disabled = true;
     
-    const id = document.getElementById('memberId').value;
+    const id = document.getElementById('memberId').value || null;
     const newPass = document.getElementById('memPass').value.trim();
 
-    // Chuẩn bị gói dữ liệu cơ bản
+    // Chuẩn bị Data Payload gọi RPC
     const payload = {
-      full_name: document.getElementById('memFullName').value, 
-      email: document.getElementById('memEmail').value,
-      role: document.getElementById('memRole').value
+      p_admin_id: window.currentUser.id, // ID của anh truyền xuống để DB xác thực
+      p_target_id: id,                   // ID của nhân viên cần sửa (Null nếu thêm mới)
+      p_full_name: document.getElementById('memFullName').value, 
+      p_email: document.getElementById('memEmail').value,
+      p_password: newPass || null,
+      p_role: document.getElementById('memRole').value
     };
 
-    // CHỈ đưa mật khẩu vào lệnh Update/Insert nếu Admin thực sự gõ mật khẩu mới
-    if (newPass) {
-      payload.password = newPass;
-    }
-
     try {
-      if (id) {
-        // Cập nhật người cũ
-        await window.sbClient.from('members').update(payload).eq('id', id);
-      } else {
-        // Thêm người mới
-        if (!newPass) throw new Error("Vui lòng nhập mật khẩu cho nhân sự mới!");
-        payload.is_active = true; 
-        await window.sbClient.from('members').insert([payload]); 
-      }
+      // Giao tiếp qua RPC thay vì gọi thẳng vào bảng
+      const { error } = await window.sbClient.rpc('admin_save_member', payload);
+      if (error) throw new Error(error.message);
       
       document.getElementById('btnCloseMemberModal').click();
       Swal.fire({ icon: 'success', title: 'Thành công', timer: 1500, showConfirmButton: false });
@@ -265,25 +257,36 @@
     }
   }
 
-  // 4. KHÓA TÀI KHOẢN
+  // 4. KHÓA TÀI KHOẢN QUA RPC
   function toggleMemberStatus(id, active) {
     Swal.fire({ title: 'Xác nhận?', text: active ? "Khóa tài khoản này?" : "Mở khóa tài khoản?", icon: 'warning', showCancelButton: true, confirmButtonText: 'Đồng ý' })
     .then(async (res) => {
       if (res.isConfirmed) {
-        await window.sbClient.from('members').update({ is_active: !active }).eq('id', id);
-        loadMembers();
+        const { error } = await window.sbClient.rpc('admin_toggle_member', {
+          p_admin_id: window.currentUser.id,
+          p_target_id: id,
+          p_is_active: !active
+        });
+        if (error) Swal.fire('Lỗi', error.message, 'error');
+        else loadMembers();
       }
     });
   }
 
-  // 5. XÓA TÀI KHOẢN
+  // 5. XÓA TÀI KHOẢN QUA RPC
   function deleteMember(id) {
     Swal.fire({ title: 'Xóa nhân sự?', text: "Hành động này không thể hoàn tác!", icon: 'error', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Xóa vĩnh viễn' })
     .then(async (res) => {
       if (res.isConfirmed) {
-        await window.sbClient.from('members').delete().eq('id', id);
-        Swal.fire({ icon: 'success', title: 'Đã xóa', timer: 1500, showConfirmButton: false });
-        loadMembers();
+        const { error } = await window.sbClient.rpc('admin_delete_member', {
+          p_admin_id: window.currentUser.id,
+          p_target_id: id
+        });
+        if (error) Swal.fire('Lỗi', error.message, 'error');
+        else {
+          Swal.fire({ icon: 'success', title: 'Đã xóa', timer: 1500, showConfirmButton: false });
+          loadMembers();
+        }
       }
     });
   }
