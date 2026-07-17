@@ -1,0 +1,352 @@
+<!-- ========================================== -->
+<!-- MODULE: QUẢN LÝ DỰ ÁN (page_duan.html) -->
+<!-- ========================================== -->
+<style>
+  .filter-bar { background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--tblr-border-color); }
+  .project-title { font-size: 16px; font-weight: 700; color: #146654; margin-bottom: 4px; }
+  .view-label { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .view-value { font-size: 14px; font-weight: 500; color: #1e293b; margin-bottom: 16px; }
+  .desc-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; font-size: 13.5px; color: #334155; line-height: 1.6; white-space: pre-wrap; }
+</style>
+
+<div class="page-header d-print-none mt-4">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <h2 class="page-title" style="color: var(--tblr-primary); font-weight: 700;">
+          <i class="ti ti-building-skyscraper me-2"></i> Danh mục Dự án
+        </h2>
+        <div class="text-muted mt-1" style="font-size: 13px;">Quản lý thông tin các dự án bất động sản đang phân phối</div>
+      </div>
+      <div class="col-auto ms-auto d-print-none" id="adminProjectActions">
+        <button class="btn btn-brand d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modal-edit-project" onclick="openProjectEditModal()">
+          <i class="ti ti-plus"></i> Thêm dự án
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="container-xl">
+    
+    <!-- BỘ LỌC DỮ LIỆU -->
+    <div class="filter-bar row g-2">
+      <div class="col-md-10">
+        <div class="input-icon">
+          <span class="input-icon-addon"><i class="ti ti-search"></i></span>
+          <input type="text" id="filterProjectSearch" class="form-control" placeholder="Tìm tên dự án, chủ đầu tư, vị trí..." onkeyup="applyProjectFilter()">
+        </div>
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2" onclick="resetProjectFilter()">
+          <i class="ti ti-refresh"></i> Tải lại
+        </button>
+      </div>
+    </div>
+
+    <!-- BẢNG DỮ LIỆU DỰ ÁN -->
+    <div class="card" style="border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); overflow: hidden;">
+      <div class="table-responsive">
+        <table class="table table-vcenter card-table table-hover text-nowrap">
+          <thead>
+            <tr>
+              <th class="w-1 text-center">STT</th>
+              <th>TÊN DỰ ÁN</th>
+              <th>CHỦ ĐẦU TƯ</th>
+              <th>VỊ TRÍ</th>
+              <th>NGÀY TẠO</th>
+              <th class="text-center">THAO TÁC</th>
+            </tr>
+          </thead>
+          <tbody id="projectTableBody">
+            <tr><td colspan="6" class="text-center text-muted py-4">Đang tải dữ liệu từ máy chủ...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL XEM CHI TIẾT DỰ ÁN (DÀNH CHO MỌI ROLE) -->
+<!-- ========================================== -->
+<div class="modal modal-blur fade" id="modal-view-project" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content shadow-lg" style="border-radius: 16px; border: none; overflow: hidden;">
+      
+      <div class="modal-header" style="background: linear-gradient(135deg, #f8fafc, #f1f5f9); border-bottom: 3px solid #146654;">
+        <h5 class="modal-title project-title" id="viewProjectName" style="font-size: 22px; color: #146654;"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      
+      <div class="modal-body p-4">
+        <div class="row mb-4 g-3">
+          <div class="col-md-6">
+            <div class="view-label d-flex align-items-center mb-1">
+              <i class="ti ti-user-star text-warning fs-3 me-2"></i> CHỦ ĐẦU TƯ
+            </div>
+            <div class="view-value fs-3 ms-4" id="viewProjectInvestor" style="color: #0f172a;"></div>
+          </div>
+          <div class="col-md-6">
+            <div class="view-label d-flex align-items-center mb-1">
+              <i class="ti ti-map-pin text-danger fs-3 me-2"></i> VỊ TRÍ ĐỊA LÝ
+            </div>
+            <div class="view-value fs-3 ms-4" id="viewProjectLocation" style="color: #0f172a;"></div>
+          </div>
+        </div>
+        
+        <div class="mt-4">
+          <div class="view-label d-flex align-items-center mb-2">
+            <i class="ti ti-file-description text-primary fs-3 me-2"></i> MÔ TẢ TỔNG QUAN
+          </div>
+          <div class="desc-box shadow-sm" id="viewProjectDesc" style="background: #ffffff; border-left: 4px solid #146654; font-size: 14.5px; padding: 20px;"></div>
+        </div>
+      </div>
+      
+      <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0;">
+        <button type="button" class="btn btn-brand ms-auto" data-bs-dismiss="modal" style="border-radius: 8px;">
+          Đóng cửa sổ <i class="ti ti-x ms-2"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL THÊM/SỬA DỰ ÁN (CHỈ DÀNH CHO ADMIN) -->
+<!-- ========================================== -->
+<div class="modal modal-blur fade" id="modal-edit-project" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content" style="border-radius: 12px;">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitleProject" style="font-weight: 700; color: var(--tblr-primary);"><i class="ti ti-edit me-2"></i> Thêm Dự Án Mới</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="btnCloseProjectModal"></button>
+      </div>
+      <form id="projectForm" onsubmit="event.preventDefault(); saveProject();">
+        <div class="modal-body p-4">
+          <input type="hidden" id="projectId">
+          
+          <div class="mb-4">
+            <h3 class="fw-bold" style="color: #146654; font-size: 16px;"><i class="ti ti-building-community me-2"></i>Thông Tin Cơ Bản</h3>
+            <hr class="mt-2 mb-0" style="border-color: #cbd5e1; opacity: 0.5;">
+          </div>
+
+          <div class="row gx-3">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-medium required" style="font-size: 13px; color: #475569;">Tên dự án</label>
+              <div class="input-icon">
+                <span class="input-icon-addon"><i class="ti ti-signature text-muted"></i></span>
+                <input type="text" id="prjName" class="form-control form-control-lg fs-4" required placeholder="VD: Capital Square Đà Nẵng" style="border-radius: 8px; border-color: #cbd5e1; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);">
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-medium required" style="font-size: 13px; color: #475569;">Chủ đầu tư</label>
+              <div class="input-icon">
+                <span class="input-icon-addon"><i class="ti ti-tie text-muted"></i></span>
+                <input type="text" id="prjInvestor" class="form-control form-control-lg fs-4" required placeholder="VD: Tập đoàn BRG" style="border-radius: 8px; border-color: #cbd5e1; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);">
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-medium required" style="font-size: 13px; color: #475569;">Vị trí dự án</label>
+            <div class="input-icon">
+              <span class="input-icon-addon"><i class="ti ti-map-pin text-danger"></i></span>
+              <input type="text" id="prjLocation" class="form-control form-control-lg fs-4" required placeholder="VD: Chân cầu Sông Hàn (3 mặt tiền), Đà Nẵng" style="border-radius: 8px; border-color: #cbd5e1; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);">
+            </div>
+          </div>
+
+          <div class="mb-3 mt-5">
+            <h3 class="fw-bold" style="color: #146654; font-size: 16px;"><i class="ti ti-align-justified me-2"></i>Chi Tiết Quy Mô & Chính Sách</h3>
+            <hr class="mt-2 mb-3" style="border-color: #cbd5e1; opacity: 0.5;">
+          </div>
+
+          <div class="mb-2">
+            <textarea id="prjDesc" class="form-control" rows="5" placeholder="Ghi chú thêm về quy mô, hệ thống tiện ích, chính sách bán hàng hoặc hoa hồng chiết khấu..." style="border-radius: 8px; resize: none; background: #f8fafc; border: 1px dashed #94a3b8; padding: 16px; color: #1e293b;"></textarea>
+            <div class="form-hint mt-2 text-muted" style="font-size: 12px;"><i class="ti ti-info-circle text-primary me-1"></i>Dữ liệu này sẽ là cẩm nang giúp Sales tra cứu nhanh khi tư vấn khách hàng.</div>
+          </div>
+
+        </div>
+
+        <div class="modal-footer d-flex align-items-center" style="background: #f1f5f9; border-radius: 0 0 12px 12px; border-top: 1px solid #e2e8f0; padding: 16px 24px;">
+          <button type="button" class="btn btn-link link-secondary fw-medium text-decoration-none" data-bs-dismiss="modal">Hủy bỏ thao tác</button>
+          
+          <button type="submit" class="btn btn-primary ms-auto d-flex align-items-center gap-2" id="btnSaveProject" style="background: linear-gradient(135deg, #146654 0%, #0d4639 100%); border: none; box-shadow: 0 4px 12px rgba(20, 102, 84, 0.25); border-radius: 8px; padding: 10px 24px; font-weight: 600; letter-spacing: 0.5px;">
+            <i class="ti ti-device-floppy fs-3"></i> Lưu dữ liệu dự án
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  let globalProjects = [];
+  let prjSearchTimeout = null;
+
+  // 1. TẢI DANH SÁCH DỰ ÁN
+  async function loadProjects() {
+    // Phân quyền giao diện: Ẩn nút Thêm nếu không phải Admin
+    if (window.currentUser && window.currentUser.role !== 'admin') {
+      const adminPanel = document.getElementById('adminProjectActions');
+      if (adminPanel) adminPanel.style.display = 'none';
+    }
+
+    const { data, error } = await window.sbClient.from('projects').select('*').order('created_at', { ascending: false });
+    if (error) { Swal.fire('Lỗi', error.message, 'error'); return; }
+    
+    globalProjects = data;
+    renderProjectTable(data);
+  }
+
+  // 2. RENDER BẢNG
+  function renderProjectTable(dataList) {
+    const tbody = document.getElementById('projectTableBody');
+    tbody.innerHTML = '';
+    
+    if(dataList.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">Chưa có dữ liệu dự án.</td></tr>'; return;
+    }
+
+    dataList.forEach((prj, index) => {
+      const createDate = new Date(prj.created_at).toLocaleDateString('vi-VN');
+      
+      // Phân quyền nút Thao tác
+      let actionButtons = `<button class="btn btn-sm btn-outline-success p-2 px-3 me-1" data-bs-toggle="modal" data-bs-target="#modal-view-project" onclick="openProjectViewModal('${prj.id}')"><i class="ti ti-eye"></i> Xem</button>`;
+      
+      if (window.currentUser && window.currentUser.role === 'admin') {
+        actionButtons += `
+          <button class="btn btn-sm btn-outline-primary p-2 px-3 me-1" data-bs-toggle="modal" data-bs-target="#modal-edit-project" onclick="openProjectEditModal('${prj.id}')"><i class="ti ti-pencil"></i> Sửa</button>
+          <button class="btn btn-sm btn-outline-danger p-2 px-3" onclick="deleteProject('${prj.id}')"><i class="ti ti-trash"></i> Xóa</button>
+        `;
+      }
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="text-center text-muted">${index + 1}</td>
+        <td><div class="font-weight-medium text-primary">${prj.project_name}</div></td>
+        <td class="text-muted">${prj.investor || '-'}</td>
+        <td class="text-muted"><i class="ti ti-map-pin me-1 text-danger"></i>${prj.location || '-'}</td>
+        <td class="text-muted" style="font-size: 13px;">${createDate}</td>
+        <td class="text-center">
+          <div class="d-flex justify-content-center align-items-center gap-1">${actionButtons}</div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // 3. BỘ LỌC TÌM KIẾM DỰ ÁN (Realtime)
+  function applyProjectFilter() {
+    clearTimeout(prjSearchTimeout);
+    prjSearchTimeout = setTimeout(() => {
+      const keyword = document.getElementById('filterProjectSearch').value.toLowerCase();
+      const filtered = globalProjects.filter(prj => {
+        return (prj.project_name && prj.project_name.toLowerCase().includes(keyword)) ||
+               (prj.investor && prj.investor.toLowerCase().includes(keyword)) ||
+               (prj.location && prj.location.toLowerCase().includes(keyword));
+      });
+      renderProjectTable(filtered);
+    }, 300);
+  }
+
+  function resetProjectFilter() {
+    document.getElementById('filterProjectSearch').value = '';
+    renderProjectTable(globalProjects);
+  }
+
+  // 4. MỞ MODAL XEM CHI TIẾT (DÀNH CHO SALES/LEADER/ADMIN)
+  // 4. MỞ MODAL XEM CHI TIẾT (ĐÃ KÍCH HOẠT HTML & AUTO-LINK)
+  function openProjectViewModal(id) {
+    const prj = globalProjects.find(p => p.id === id);
+    if (!prj) return;
+    
+    document.getElementById('viewProjectName').innerHTML = `<i class="ti ti-building-community text-success me-2"></i> ${prj.project_name}`;
+    document.getElementById('viewProjectInvestor').innerHTML = prj.investor || '<span class="text-muted">Đang cập nhật...</span>';
+    document.getElementById('viewProjectLocation').innerHTML = prj.location || '<span class="text-muted">Đang cập nhật...</span>';
+    
+    let desc = prj.description || '<span class="text-muted">Chưa có thông tin mô tả chi tiết cho dự án này.</span>';
+    
+    if (prj.description) {
+      // BƯỚC A: Tự động tìm các đường link (http/https) và biến thành nút bấm Clickable
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      desc = desc.replace(urlRegex, function(url) {
+        return `<a href="${url}" target="_blank" class="badge bg-blue-lt text-decoration-none py-1 px-2" style="font-size: 13px;"><i class="ti ti-brand-google-drive me-1"></i>Mở Link tài liệu</a>`;
+      });
+      
+      // BƯỚC B: Chuyển đổi các dấu Enter (xuống dòng) thành thẻ <br> để không bị dồn chữ
+      desc = desc.replace(/\n/g, '<br>');
+    }
+    
+    // BƯỚC C: Dùng innerHTML để trình duyệt "dịch" các thẻ <b>, <i>, <u> của bạn
+    document.getElementById('viewProjectDesc').innerHTML = desc;
+  }
+
+  // 5. MỞ MODAL THÊM/SỬA (CHỈ ADMIN)
+  function openProjectEditModal(id = null) {
+    document.getElementById('projectForm').reset();
+    document.getElementById('projectId').value = '';
+    
+    if (id) {
+      document.getElementById('modalTitleProject').innerHTML = '<i class="ti ti-edit me-2"></i> Cập nhật Thông tin Dự án';
+      const prj = globalProjects.find(p => p.id === id);
+      document.getElementById('projectId').value = prj.id;
+      document.getElementById('prjName').value = prj.project_name;
+      document.getElementById('prjInvestor').value = prj.investor;
+      document.getElementById('prjLocation').value = prj.location;
+      document.getElementById('prjDesc').value = prj.description || '';
+    } else {
+      document.getElementById('modalTitleProject').innerHTML = '<i class="ti ti-plus me-2"></i> Thêm Dự Án Mới';
+    }
+  }
+
+  // 6. LƯU DỮ LIỆU
+  async function saveProject() {
+    const btn = document.getElementById('btnSaveProject');
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang xử lý...'; btn.disabled = true;
+    
+    const id = document.getElementById('projectId').value;
+    const payload = {
+      project_name: document.getElementById('prjName').value,
+      investor: document.getElementById('prjInvestor').value,
+      location: document.getElementById('prjLocation').value,
+      description: document.getElementById('prjDesc').value || null
+    };
+
+    try {
+      if (id) {
+        const { error } = await window.sbClient.from('projects').update(payload).eq('id', id);
+        if (error) throw error;
+      } else {
+        const { error } = await window.sbClient.from('projects').insert([payload]);
+        if (error) throw error;
+      }
+      
+      document.getElementById('btnCloseProjectModal').click();
+      Swal.fire({ icon: 'success', title: 'Lưu thành công', timer: 1500, showConfirmButton: false });
+      await loadProjects();
+    } catch (err) { 
+      Swal.fire({ icon: 'error', title: 'Lỗi', text: err.message, confirmButtonColor: '#146654' }); 
+    } finally { 
+      btn.innerHTML = '<i class="ti ti-device-floppy me-2"></i> Lưu dự án'; btn.disabled = false; 
+    }
+  }
+
+  // 7. XÓA DỰ ÁN
+  function deleteProject(id) {
+    Swal.fire({ title: 'Xóa dự án?', text: "Hành động này không thể hoàn tác!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Xóa vĩnh viễn' })
+    .then(async (res) => {
+      if (res.isConfirmed) {
+        const { error } = await window.sbClient.from('projects').delete().eq('id', id);
+        if (error) {
+          Swal.fire('Lỗi', error.message, 'error');
+        } else {
+          Swal.fire({ icon: 'success', title: 'Đã xóa', timer: 1500, showConfirmButton: false });
+          loadProjects();
+        }
+      }
+    });
+  }
+</script>
