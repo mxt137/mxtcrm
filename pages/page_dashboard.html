@@ -1,3 +1,14 @@
+<style>
+  .metric-card { border: none; border-radius: 12px; transition: transform 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+  .metric-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
+  .metric-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+  .todo-box { background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; height: 100%; }
+  .todo-item { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid #f1f5f9; transition: background 0.2s; }
+  .todo-item:hover { background: #f8fafc; }
+  .todo-item.completed .todo-text { text-decoration: line-through; color: #94a3b8; }
+  .todo-checkbox { cursor: pointer; width: 18px; height: 18px; }
+</style>
+
 <div class="page-header d-print-none mt-4">
   <div class="container-xl">
     <div class="row g-2 align-items-center">
@@ -16,13 +27,17 @@
     <div class="row g-4">
       
       <div class="col-lg-8">
+        
         <div id="adminGlobalStats" style="display: none; margin-bottom: 24px;">
           <h4 class="mb-3 text-uppercase text-muted fw-bold" style="font-size: 11px; letter-spacing: 1px;">TỔNG QUAN HỆ THỐNG (ADMIN)</h4>
           <div class="row g-3">
             <div class="col-sm-3">
               <div class="card metric-card" style="border-bottom: 3px solid #4263eb;">
                 <div class="card-body p-3 d-flex flex-column justify-content-center">
-                  <div class="d-flex align-items-center gap-2 mb-2"><i class="ti ti-users text-indigo fs-2"></i><div class="text-muted fw-medium" style="font-size: 11px; text-transform: uppercase;">Tổng Khách Hàng</div></div>
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="ti ti-users text-indigo fs-2"></i>
+                    <div class="text-muted fw-medium" style="font-size: 11px; text-transform: uppercase;">Tổng Khách Hàng</div>
+                  </div>
                   <div class="fs-2 fw-bold text-dark" id="admTotalCus"><span class="spinner-border spinner-border-sm text-muted"></span></div>
                 </div>
               </div>
@@ -30,12 +45,36 @@
             <div class="col-sm-3">
               <div class="card metric-card" style="border-bottom: 3px solid #0ca678;">
                 <div class="card-body p-3 d-flex flex-column justify-content-center">
-                  <div class="d-flex align-items-center gap-2 mb-2"><i class="ti ti-building-skyscraper text-teal fs-2"></i><div class="text-muted fw-medium" style="font-size: 11px; text-transform: uppercase;">Tổng Dự Án</div></div>
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="ti ti-building-skyscraper text-teal fs-2"></i>
+                    <div class="text-muted fw-medium" style="font-size: 11px; text-transform: uppercase;">Tổng Dự Án</div>
+                  </div>
                   <div class="fs-2 fw-bold text-dark" id="admTotalProj"><span class="spinner-border spinner-border-sm text-muted"></span></div>
                 </div>
               </div>
             </div>
-            <!-- Các box khác tương tự -->
+            <div class="col-sm-3">
+              <div class="card metric-card" style="border-bottom: 3px solid #d63384;">
+                <div class="card-body p-3 d-flex flex-column justify-content-center">
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="ti ti-home-check text-pink fs-2"></i>
+                    <div class="text-muted fw-medium" style="font-size: 11px; text-transform: uppercase;">Tổng Rổ Hàng</div>
+                  </div>
+                  <div class="fs-2 fw-bold text-dark" id="admTotalProp"><span class="spinner-border spinner-border-sm text-muted"></span></div>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="card metric-card" style="border-bottom: 3px solid #2fb344;">
+                <div class="card-body p-3 d-flex flex-column justify-content-center">
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="ti ti-coin text-green fs-2"></i>
+                    <div class="text-muted fw-medium" style="font-size: 11px; text-transform: uppercase;">Hợp Đồng (Active)</div>
+                  </div>
+                  <div class="fw-bold text-dark" id="admTotalRev" style="font-size: 18px; white-space: nowrap; letter-spacing: -0.5px;"><span class="spinner-border spinner-border-sm text-muted"></span></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -45,27 +84,66 @@
             <div class="card metric-card border-start border-3 border-blue">
               <div class="card-body p-3 d-flex align-items-center gap-3">
                 <div class="metric-icon bg-blue-lt text-blue"><i class="ti ti-address-book"></i></div>
-                <div><div class="text-muted fw-medium" style="font-size: 12px;">Khách đang chăm sóc</div><div class="fs-1 fw-bold text-dark" id="myTotalCus">0</div></div>
+                <div>
+                  <div class="text-muted fw-medium" style="font-size: 12px;">Khách đang chăm sóc</div>
+                  <div class="fs-1 fw-bold text-dark" id="myTotalCus"><span class="spinner-border spinner-border-sm text-muted"></span></div>
+                </div>
               </div>
             </div>
           </div>
-          <!-- Các box cá nhân khác -->
+          <div class="col-sm-6">
+            <div class="card metric-card border-start border-3 border-orange">
+              <div class="card-body p-3 d-flex align-items-center gap-3">
+                <div class="metric-icon bg-orange-lt text-orange"><i class="ti ti-star"></i></div>
+                <div>
+                  <div class="text-muted fw-medium" style="font-size: 12px;">Khách Tiềm Năng</div>
+                  <div class="fs-1 fw-bold text-dark" id="myPotentialCus"><span class="spinner-border spinner-border-sm text-muted"></span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="card metric-card border-start border-3 border-red">
+              <div class="card-body p-3 d-flex align-items-center gap-3">
+                <div class="metric-icon bg-red-lt text-red"><i class="ti ti-file-certificate"></i></div>
+                <div>
+                  <div class="text-muted fw-medium" style="font-size: 12px;">Hợp đồng Đang hiệu lực</div>
+                  <div class="fs-1 fw-bold text-dark" id="myActiveContracts"><span class="spinner-border spinner-border-sm text-muted"></span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="card metric-card border-start border-3 border-cyan">
+              <div class="card-body p-3 d-flex align-items-center gap-3">
+                <div class="metric-icon bg-cyan-lt text-cyan"><i class="ti ti-headset"></i></div>
+                <div>
+                  <div class="text-muted fw-medium" style="font-size: 12px;">Data MKT chưa xử lý</div>
+                  <div class="fs-1 fw-bold text-dark" id="myPendingLeads"><span class="spinner-border spinner-border-sm text-muted"></span></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+
       </div>
 
       <div class="col-lg-4">
         <div class="todo-box d-flex flex-column">
           <div class="p-3 border-bottom" style="background: #f8fafc; border-radius: 12px 12px 0 0;">
             <h3 class="m-0 fw-bold" style="color: #146654;"><i class="ti ti-list-check me-2"></i> Việc Cần Làm</h3>
+            <div class="text-muted mt-1" style="font-size: 11px;">Hệ thống sẽ gửi email nhắc nhở việc chưa làm vào 7h sáng</div>
           </div>
+          
           <div class="p-3 border-bottom bg-white">
             <form onsubmit="event.preventDefault(); addTodo();" class="d-flex gap-2">
-              <input type="text" id="newTodoInput" class="form-control" placeholder="Nhập công việc mới..." required>
+              <input type="text" id="newTodoInput" class="form-control" placeholder="Nhập công việc mới và ấn Enter..." required>
               <button type="submit" class="btn btn-brand btn-icon"><i class="ti ti-plus"></i></button>
             </form>
           </div>
+
           <div class="flex-grow-1 overflow-auto" id="todoListContainer" style="max-height: 350px;">
-            <div class="text-center py-5 text-muted"><span class="spinner-border spinner-border-sm"></span> Đang tải...</div>
+            <div class="text-center py-5 text-muted"><span class="spinner-border spinner-border-sm"></span> Đang tải danh sách...</div>
           </div>
         </div>
       </div>
@@ -75,6 +153,7 @@
 </div>
 
 <script>
+  // HÀM HỖ TRỢ ĐẾM NHANH AN TOÀN
   async function fetchCount(table, matchObj = null) {
     try {
       let query = window.sbClient.from(table).select('id', { count: 'exact', head: true });
@@ -87,61 +166,136 @@
       const { count, error } = await query;
       if (error) throw error;
       return count || 0;
-    } catch (e) { return 0; }
+    } catch (e) {
+      console.error(`Lỗi đếm bảng ${table}:`, e);
+      return 0;
+    }
   }
 
+  // ==========================================
+  // 1. TẢI CHỈ SỐ DASHBOARD (BẤT ĐỒNG BỘ ĐỘC LẬP)
+  // ==========================================
   async function loadDashboardStats() {
     try {
       if (!window.currentUser) return;
+      
       const role = String(window.currentUser.role).toLowerCase().trim();
       const myId = window.currentUser.id;
 
+      // 1. Tải Todo-list
       loadTodos();
 
-      if (role.includes('admin') || role.includes('manager')) {
+      // 2. KHU VỰC ADMIN (TỔNG CÔNG TY)
+      if (role.includes('admin') || role.includes('manager') || role.includes('istrator')) {
         document.getElementById('adminGlobalStats').style.display = 'block';
-        fetchCount('customers').then(c => { const el = document.getElementById('admTotalCus'); if(el) el.innerText = new Intl.NumberFormat().format(c); });
-        fetchCount('projects').then(c => { const el = document.getElementById('admTotalProj'); if(el) el.innerText = new Intl.NumberFormat().format(c); });
+        
+        // Gọi các chỉ số độc lập, cái nào có trước hiện trước
+        fetchCount('customers').then(c => document.getElementById('admTotalCus').innerText = new Intl.NumberFormat().format(c));
+        fetchCount('projects').then(c => document.getElementById('admTotalProj').innerText = new Intl.NumberFormat().format(c));
+        fetchCount('properties').then(c => document.getElementById('admTotalProp').innerText = new Intl.NumberFormat().format(c));
+        
+        // Tổng số lượng & Doanh thu Hợp đồng
+        window.sbClient.from('contracts').select('contract_value').eq('status', 'Active').then(({data, error}) => {
+          if (!error && data) {
+            const count = data.length; 
+            const totalRev = data.reduce((sum, row) => sum + Number(row.contract_value || 0), 0); 
+            
+            document.getElementById('admTotalRev').innerHTML = `
+              <span style="font-size: 14px; font-weight: 700; color: #475569;">${count} HĐ</span> 
+              <span style="color: #cbd5e1; font-weight: 300; margin: 0 4px;">|</span> 
+              <span style="color: #146654;">${new Intl.NumberFormat('vi-VN').format(totalRev)}đ</span>
+            `;
+          } else {
+            document.getElementById('admTotalRev').innerHTML = '<span style="font-size: 14px;">0 HĐ</span> <span style="color: #cbd5e1;">|</span> 0đ';
+          }
+        });
+        // doanh thu chỉ đếm số lượng:
+        //fetchCount('contracts', { status: 'Active' }).then(c => document.getElementById('admTotalRev').innerText = new Intl.NumberFormat().format(c));
       }
 
-      fetchCount('customers', { assigned_to: myId }).then(c => { const el = document.getElementById('myTotalCus'); if(el) el.innerText = new Intl.NumberFormat().format(c); });
+      // 3. KHU VỰC CÁ NHÂN CỦA SALES
+      fetchCount('customers', { assigned_to: myId }).then(c => document.getElementById('myTotalCus').innerText = new Intl.NumberFormat().format(c));
+      fetchCount('customers', { assigned_to: myId, lead_status: 'potential' }).then(c => document.getElementById('myPotentialCus').innerText = new Intl.NumberFormat().format(c));
+      fetchCount('contracts', { sales_id: myId, status: 'Active' }).then(c => document.getElementById('myActiveContracts').innerText = new Intl.NumberFormat().format(c));
+      fetchCount('marketing_leads', { sales_id: myId, status: 'Đã phát', quick_report: null }).then(c => document.getElementById('myPendingLeads').innerText = new Intl.NumberFormat().format(c));
 
-    } catch (error) { console.error("Lỗi khởi tạo Dashboard:", error); }
+    } catch (error) {
+      console.error("Lỗi khởi tạo Dashboard:", error);
+    }
   }
 
+  // ==========================================
+  // 2. LOGIC TODO LIST
+  // ==========================================
   async function loadTodos() {
     const container = document.getElementById('todoListContainer');
     const myId = window.currentUser.id;
+
     try {
-      const { data, error } = await window.sbClient.from('todos').select('*').eq('user_id', myId).order('is_completed', { ascending: true }).order('created_at', { ascending: false });
-      if (error) throw error;
+      const { data, error } = await window.sbClient
+        .from('todos')
+        .select('*')
+        .eq('user_id', myId)
+        .order('is_completed', { ascending: true }) 
+        .order('created_at', { ascending: false });
+
+      if (error) { 
+        container.innerHTML = '<div class="text-danger p-3 text-center">Lỗi tải dữ liệu. Bạn đã chạy lệnh tạo bảng "todos" trong Supabase chưa?</div>'; 
+        return; 
+      }
 
       container.innerHTML = '';
       if (!data || data.length === 0) {
-        container.innerHTML = '<div class="text-center py-5 text-muted">Hoàn tất công việc!</div>'; return;
+        container.innerHTML = '<div class="text-center py-5 text-muted"><i class="ti ti-check bg-success text-white rounded-circle p-2 fs-2 mb-2"></i><br>Tuyệt vời! Bạn không có việc nào tồn đọng.</div>';
+        return;
       }
+
       data.forEach(todo => {
         const isChecked = todo.is_completed ? 'checked' : '';
         const completedClass = todo.is_completed ? 'completed' : '';
+
         const div = document.createElement('div');
         div.className = `todo-item ${completedClass}`;
-        div.innerHTML = `<input class="form-check-input todo-checkbox m-0 me-3" type="checkbox" ${isChecked} onchange="toggleTodo('${todo.id}', this.checked)"><span class="todo-text fw-medium" style="font-size: 13.5px;">${todo.task_name}</span><button class="btn btn-sm text-danger btn-icon ms-auto border-0 bg-transparent" onclick="deleteTodo('${todo.id}')"><i class="ti ti-trash"></i></button>`;
+        div.innerHTML = `
+          <input class="form-check-input todo-checkbox m-0 me-3" type="checkbox" ${isChecked} onchange="toggleTodo('${todo.id}', this.checked)">
+          <span class="todo-text fw-medium" style="font-size: 13.5px;">${todo.task_name}</span>
+          <button class="btn btn-sm text-danger btn-icon ms-auto border-0 bg-transparent" onclick="deleteTodo('${todo.id}')"><i class="ti ti-trash"></i></button>
+        `;
         container.appendChild(div);
       });
-    } catch (err) { container.innerHTML = '<div class="text-danger p-3">Lỗi Todo list.</div>'; }
+    } catch (err) {
+      container.innerHTML = '<div class="text-danger p-3">Lỗi kết nối Todo list.</div>';
+    }
   }
 
   async function addTodo() {
     const input = document.getElementById('newTodoInput');
     const taskName = input.value.trim();
     if (!taskName) return;
+
     input.disabled = true;
     try {
-      await window.sbClient.from('todos').insert([{ user_id: window.currentUser.id, task_name: taskName }]);
-      input.value = ''; await loadTodos();
-    } catch (err) { Swal.fire('Lỗi', err.message, 'error'); } finally { input.disabled = false; input.focus(); }
+      await window.sbClient.from('todos').insert([{
+        user_id: window.currentUser.id,
+        task_name: taskName
+      }]);
+      input.value = '';
+      await loadTodos();
+    } catch (err) {
+      Swal.fire('Lỗi', err.message, 'error');
+    } finally {
+      input.disabled = false;
+      input.focus();
+    }
   }
 
-  async function toggleTodo(id, isCompleted) { await window.sbClient.from('todos').update({ is_completed: isCompleted }).eq('id', id); loadTodos(); }
-  async function deleteTodo(id) { await window.sbClient.from('todos').delete().eq('id', id); loadTodos(); }
+  async function toggleTodo(id, isCompleted) {
+    await window.sbClient.from('todos').update({ is_completed: isCompleted }).eq('id', id);
+    loadTodos(); 
+  }
+
+  async function deleteTodo(id) {
+    await window.sbClient.from('todos').delete().eq('id', id);
+    loadTodos();
+  }
 </script>
