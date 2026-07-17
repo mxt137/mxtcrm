@@ -38,6 +38,36 @@
               </a>
             </li>
             <!-- Các menu khác (Thành viên, Dự án...) thêm ở đây -->
+            <li class="nav-item">
+              <a class="nav-link nav-menu" id="nav-member" onclick="switchPage('member')" style="cursor: pointer;">
+                <i class="ti ti-users me-2 fs-2 nav-link-icon"></i> Thành viên
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link nav-menu" id="nav-khachhang" onclick="switchPage('khachhang')" style="cursor: pointer;">
+                <i class="ti ti-address-book me-2 fs-2 nav-link-icon"></i> Khách hàng
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link nav-menu" id="nav-duan" onclick="switchPage('duan')" style="cursor: pointer;">
+                <i class="ti ti-building-skyscraper me-2 fs-2 nav-link-icon"></i> Dự án
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link nav-menu" id="nav-rohang" onclick="switchPage('rohang')" style="cursor: pointer;">
+                <i class="ti ti-home-check me-2 fs-2 nav-link-icon"></i> Rổ hàng thuê
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link nav-menu" id="nav-hopdong" onclick="switchPage('hopdong')" style="cursor: pointer;">
+                <i class="ti ti-file-certificate me-2 fs-2 nav-link-icon"></i> Hợp đồng
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link nav-menu" id="nav-marketing" onclick="switchPage('marketing')" style="cursor: pointer;">
+                <i class="ti ti-headset me-2 fs-2 nav-link-icon"></i> Kho Marketing
+              </a>
+            </li>
           </ul>
         </div>
       </div>
@@ -176,6 +206,12 @@
 
       // Khởi chạy dữ liệu sau khi Load
       if (pageId === 'dashboard' && typeof loadDashboardStats === 'function') loadDashboardStats();
+      if (pageId === 'member' && typeof loadMembers === 'function') loadMembers();
+      if (pageId === 'khachhang' && typeof loadCustomers === 'function') loadSalesList().then(() => loadCustomers());
+      if (pageId === 'duan' && typeof loadProjects === 'function') loadProjects();
+      if (pageId === 'rohang' && typeof loadProperties === 'function') loadProperties();
+      if (pageId === 'hopdong' && typeof loadContracts === 'function') loadContracts();
+      if (pageId === 'marketing' && typeof loadMarketingModule === 'function') loadMarketingModule();
     }
 
     // 6. KHỞI CHẠY HỆ THỐNG KHI TẢI TRANG
