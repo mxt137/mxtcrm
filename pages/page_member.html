@@ -195,43 +195,74 @@
     }
   }
 
-  // 2. MỞ MODAL THÊM / SỬA
+  // 2. MỞ MODAL THÊM / SỬA (ĐÃ FIX LỖI UNDEFINED BẢO MẬT)
   function openMemberModal(id = null) {
     document.getElementById('memberForm').reset();
     document.getElementById('memberId').value = '';
+    const passInput = document.getElementById('memPass');
+
     if (id) {
       document.getElementById('modalTitleMember').innerHTML = '<i class="ti ti-edit me-2"></i> Cập nhật nhân sự';
       const m = globalMembers.find(x => x.id === id);
       document.getElementById('memberId').value = m.id;
       document.getElementById('memFullName').value = m.full_name;
       document.getElementById('memEmail').value = m.email;
-      document.getElementById('memPass').value = m.password;
       document.getElementById('memRole').value = m.role;
+      
+      // Xử lý thông minh cho ô Mật khẩu khi Edit
+      passInput.value = ''; // Làm sạch ô nhập
+      passInput.removeAttribute('required'); // Không bắt buộc nhập khi sửa
+      passInput.placeholder = "Bỏ trống nếu giữ nguyên mật khẩu cũ...";
     } else {
       document.getElementById('modalTitleMember').innerHTML = '<i class="ti ti-user-plus me-2"></i> Thêm nhân sự mới';
+      
+      // Bắt buộc nhập mật khẩu khi tạo mới
+      passInput.setAttribute('required', 'true');
+      passInput.placeholder = "Thiết lập mật khẩu...";
     }
   }
 
   // 3. LƯU (THÊM HOẶC CẬP NHẬT)
   async function saveMember() {
     const btn = document.getElementById('btnSaveMember');
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang lưu...'; btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang lưu...'; 
+    btn.disabled = true;
+    
     const id = document.getElementById('memberId').value;
+    const newPass = document.getElementById('memPass').value.trim();
+
+    // Chuẩn bị gói dữ liệu cơ bản
     const payload = {
       full_name: document.getElementById('memFullName').value, 
       email: document.getElementById('memEmail').value,
-      password: document.getElementById('memPass').value, 
       role: document.getElementById('memRole').value
     };
+
+    // CHỈ đưa mật khẩu vào lệnh Update/Insert nếu Admin thực sự gõ mật khẩu mới
+    if (newPass) {
+      payload.password = newPass;
+    }
+
     try {
-      if (id) await window.sbClient.from('members').update(payload).eq('id', id);
-      else { payload.is_active = true; await window.sbClient.from('members').insert([payload]); }
+      if (id) {
+        // Cập nhật người cũ
+        await window.sbClient.from('members').update(payload).eq('id', id);
+      } else {
+        // Thêm người mới
+        if (!newPass) throw new Error("Vui lòng nhập mật khẩu cho nhân sự mới!");
+        payload.is_active = true; 
+        await window.sbClient.from('members').insert([payload]); 
+      }
       
       document.getElementById('btnCloseMemberModal').click();
       Swal.fire({ icon: 'success', title: 'Thành công', timer: 1500, showConfirmButton: false });
       await loadMembers();
-    } catch (err) { Swal.fire('Lỗi', err.message, 'error'); }
-    finally { btn.innerHTML = '<i class="ti ti-device-floppy me-2"></i> Lưu dữ liệu'; btn.disabled = false; }
+    } catch (err) { 
+      Swal.fire('Lỗi', err.message, 'error'); 
+    } finally { 
+      btn.innerHTML = '<i class="ti ti-device-floppy fs-3 me-2"></i> Lưu thông tin nhân sự'; 
+      btn.disabled = false; 
+    }
   }
 
   // 4. KHÓA TÀI KHOẢN
