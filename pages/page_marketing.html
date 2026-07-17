@@ -4,6 +4,8 @@
   .stat-card { border: none; border-radius: 12px; color: white; overflow: hidden; position: relative; }
   .stat-icon { position: absolute; right: -15px; bottom: -15px; font-size: 100px; opacity: 0.15; transform: rotate(-15deg); }
   .btn-report { border-radius: 8px; font-weight: 600; font-size: 12px; padding: 8px 12px; display: flex; align-items: center; justify-content: center; gap: 4px; }
+  /* CSS Bổ sung cho Form Search Nhanh */
+  .search-result-row:hover { background-color: rgba(20, 102, 84, 0.04); }
 </style>
 
 <div class="page-header d-print-none mt-4">
@@ -69,6 +71,26 @@
         </div>
       </div>
 
+      <!-- TÍNH NĂNG MỚI: TÌM KIẾM NHANH DATA MARKETING -->
+      <div class="card shadow-sm mb-4" style="border-radius: 12px; border: 1px solid #e2e8f0;">
+        <div class="card-body">
+          <h4 class="mb-3" style="color: #146654; font-weight: 700;"><i class="ti ti-search me-2"></i>Tra Cứu Dữ Liệu Nhanh</h4>
+          <div class="d-flex gap-3">
+            <div class="input-icon flex-grow-1">
+              <span class="input-icon-addon"><i class="ti ti-phone text-muted"></i></span>
+              <input type="text" id="searchPhoneInput" class="form-control form-control-lg" placeholder="Nhập số điện thoại cần tìm (VD: 090 5555 628)..." onkeypress="if(event.key === 'Enter') triggerQuickSearch()">
+            </div>
+            <button class="btn btn-brand btn-lg px-4" onclick="triggerQuickSearch()" style="font-weight: 600;">
+              <i class="ti ti-search me-2"></i> Tìm kiếm
+            </button>
+          </div>
+          
+          <!-- Khu vực đổ kết quả tìm kiếm -->
+          <div id="quickSearchResults" class="mt-3" style="display: none;"></div>
+        </div>
+      </div>
+
+      <!-- Tool Import 30k Data -->
       <div class="card shadow-sm" style="border-radius: 12px; border: 1px solid #e2e8f0;">
         <div class="card-body d-flex align-items-center gap-3">
           <i class="ti ti-brand-google-drive fs-1 text-success"></i>
@@ -338,6 +360,68 @@
       `;
       container.appendChild(col);
     });
+  }
+
+  // ==========================================
+  // HÀM MỚI: XỬ LÝ TÌM KIẾM NHANH BẰNG RPC
+  // ==========================================
+  async function triggerQuickSearch() {
+    const rawInput = document.getElementById('searchPhoneInput').value;
+    
+    // JS tự động loại bỏ mọi khoảng trắng từ input của người dùng trước khi gửi đi
+    const cleanInput = rawInput.replace(/\s+/g, ''); 
+    const resContainer = document.getElementById('quickSearchResults');
+    
+    if (cleanInput.length < 4) {
+      Swal.fire({ icon: 'warning', title: 'Lưu ý', text: 'Vui lòng nhập tối thiểu 4 số để dò tìm!', confirmButtonColor: '#146654' });
+      return;
+    }
+
+    resContainer.style.display = 'block';
+    resContainer.innerHTML = '<div class="text-center text-muted py-4"><span class="spinner-border spinner-border-sm me-2 text-primary"></span> Hệ thống đang quét 30.000 data...</div>';
+
+    try {
+      // Gọi thẳng xuống RPC đã tạo ở DB
+      const { data, error } = await window.sbClient.rpc('search_marketing_phone', { search_term: cleanInput });
+      
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        resContainer.innerHTML = '<div class="alert alert-info bg-blue-lt mb-0 border-0"><i class="ti ti-info-circle me-2"></i> Không tìm thấy dữ liệu nào khớp với số điện thoại này trong kho.</div>';
+        return;
+      }
+
+      // Xây dựng bảng kết quả
+      let html = `
+        <div class="table-responsive border rounded-3 mt-2">
+          <table class="table table-vcenter table-hover card-table m-0">
+            <thead style="background: #f8fafc;">
+              <tr>
+                <th class="ps-3 text-uppercase text-muted" style="font-size: 11px;">Tên Khách Hàng</th>
+                <th class="text-uppercase text-muted" style="font-size: 11px;">Số Điện Thoại Gốc</th>
+                <th class="text-uppercase text-muted" style="font-size: 11px;">Dự Án (Source)</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+      
+      data.forEach(item => {
+        html += `
+          <tr class="search-result-row">
+            <td class="ps-3 fw-bold text-dark">${item.customer_name || '<span class="text-muted fst-italic">Chưa có tên</span>'}</td>
+            <td class="fw-bold" style="color: #146654; font-size: 15px;">${item.phone}</td>
+            <td><span class="badge bg-secondary-lt fw-medium px-2 py-1">${item.project_name || 'Không rõ'}</span></td>
+          </tr>
+        `;
+      });
+      
+      html += '</tbody></table></div>';
+      resContainer.innerHTML = html;
+
+    } catch (err) {
+      console.error("Lỗi dò tìm data:", err);
+      resContainer.innerHTML = `<div class="alert alert-danger mb-0">Lỗi truy vấn: ${err.message}</div>`;
+    }
   }
 
   // 5. LOGIC SALES BỐC SỐ (HỖ TRỢ CHỌN DỰ ÁN)
