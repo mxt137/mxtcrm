@@ -1,0 +1,259 @@
+<div class="page-header d-print-none mt-4">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <h2 class="page-title" style="color: var(--tblr-primary); font-weight: 700;">
+          <i class="ti ti-users me-2"></i> Quản lý nhân viên
+        </h2>
+        <div class="text-muted mt-1" style="font-size: 13px;">Quản lý quyền hạn và trạng thái hoạt động của nhân sự</div>
+      </div>
+      <div class="col-auto ms-auto d-print-none" id="adminActionsPanel">
+        <button class="btn btn-brand d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modal-member" onclick="openMemberModal()">
+          <i class="ti ti-plus"></i> Thêm nhân viên
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="container-xl">
+    <div class="card" style="border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); overflow: hidden;">
+      <div class="table-responsive">
+        <table class="table table-vcenter card-table table-hover text-nowrap">
+          <thead>
+            <tr>
+              <th class="w-1 text-center">STT</th>
+              <th>NHÂN VIÊN</th>
+              <th>TÀI KHOẢN</th>
+              <th>QUYỀN HẠN</th>
+              <th>ĐĂNG NHẬP CUỐI</th>
+              <th>TRẠNG THÁI</th>
+              <th class="text-center admin-only-col">THAO TÁC</th>
+            </tr>
+          </thead>
+          <tbody id="memberTableBody">
+            <tr><td colspan="7" class="text-center text-muted py-4">Đang tải dữ liệu từ máy chủ...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal modal-blur fade" id="modal-member" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content shadow-lg" style="border-radius: 12px; border: none; overflow: hidden;">
+      
+      <!-- HEADER MODAL -->
+      <div class="modal-header" style="background: linear-gradient(135deg, #146654 0%, #0d4639 100%); color: white; border-bottom: none; padding: 20px 24px;">
+        <h5 class="modal-title fs-3" id="modalTitleMember" style="font-weight: 700; letter-spacing: 0.5px;">
+          <i class="ti ti-user-scan me-2"></i>Thiết Lập Hồ Sơ Nhân Sự
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" id="btnCloseMemberModal"></button>
+      </div>
+
+      <form id="memberForm" onsubmit="event.preventDefault(); saveMember();">
+        <div class="modal-body p-4 p-md-5">
+          <input type="hidden" id="memberId">
+          
+          <!-- PHÂN KHU 1: ĐỊNH DANH -->
+          <div class="mb-3">
+             <h3 class="fw-bold" style="color: #146654; font-size: 15px; letter-spacing: 0.3px;"><i class="ti ti-id-badge me-2"></i>1. Thông Tin Định Danh</h3>
+             <hr class="mt-2 mb-3" style="border-color: #cbd5e1; opacity: 0.5;">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-medium required" style="font-size: 13px; color: #475569;">Họ và tên</label>
+            <div class="input-icon">
+              <span class="input-icon-addon"><i class="ti ti-user text-muted"></i></span>
+              <input type="text" id="memFullName" class="form-control form-control-lg fs-4 fw-bold" placeholder="VD: Nguyễn Văn A..." required style="border-radius: 8px; border-color: #cbd5e1; color: #1e293b;">
+            </div>
+          </div>
+          
+          <div class="mb-4">
+            <label class="form-label fw-medium required" style="font-size: 13px; color: #475569;">Email đăng nhập</label>
+            <div class="input-icon">
+              <span class="input-icon-addon"><i class="ti ti-mail text-muted"></i></span>
+              <input type="email" id="memEmail" class="form-control form-control-lg fs-4" placeholder="VD: name@hoangphuong.com" required style="border-radius: 8px; border-color: #cbd5e1;">
+            </div>
+          </div>
+
+          <!-- PHÂN KHU 2: BẢO MẬT & PHÂN QUYỀN -->
+          <div class="mb-3 mt-5">
+             <h3 class="fw-bold" style="color: #146654; font-size: 15px; letter-spacing: 0.3px;"><i class="ti ti-shield-lock me-2"></i>2. Bảo Mật & Phân Quyền</h3>
+             <hr class="mt-2 mb-3" style="border-color: #cbd5e1; opacity: 0.5;">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-medium required" style="font-size: 13px; color: #475569;">Mật khẩu truy cập</label>
+            <div class="input-icon">
+              <span class="input-icon-addon"><i class="ti ti-key text-muted"></i></span>
+              <input type="text" id="memPass" class="form-control form-control-lg fs-4" placeholder="Thiết lập mật khẩu..." required style="border-radius: 8px; border-color: #cbd5e1;">
+            </div>
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label fw-medium required" style="font-size: 13px; color: #475569;">Vai trò hệ thống</label>
+            <div class="input-icon">
+              <span class="input-icon-addon"><i class="ti ti-shield-half text-danger"></i></span>
+              <select id="memRole" class="form-select form-select-lg fs-4 fw-bold" style="border-radius: 8px; border-color: #cbd5e1;">
+                <option value="sales" style="color: #2fb344;">🟢 Thành viên Sales (STAFF)</option>
+                <option value="manager" style="color: #f59e0b;">🟠 Trưởng nhóm (LEADER)</option>
+                <option value="admin" style="color: #e11d48;">🔴 Quản trị hệ thống (ADMIN)</option>
+              </select>
+            </div>
+            <div class="form-hint mt-2 text-muted" style="font-size: 12px;">
+              <i class="ti ti-info-triangle text-warning me-1"></i> Lưu ý: Quyền Admin có thể xem và can thiệp toàn bộ dữ liệu của công ty.
+            </div>
+          </div>
+
+        </div>
+
+        <!-- PHẦN CHÂN PHỦ MÀU XÁM TRANG NHÃ -->
+        <div class="modal-footer d-flex align-items-center" style="background: #f1f5f9; border-radius: 0 0 12px 12px; border-top: 1px solid #e2e8f0; padding: 16px 24px;">
+          <button type="button" class="btn btn-link link-secondary fw-medium text-decoration-none" data-bs-dismiss="modal">Hủy bỏ</button>
+          
+          <button type="submit" class="btn btn-primary ms-auto d-flex align-items-center gap-2" id="btnSaveMember" style="background: linear-gradient(135deg, #146654 0%, #0d4639 100%); border: none; box-shadow: 0 4px 12px rgba(20, 102, 84, 0.25); border-radius: 8px; padding: 10px 24px; font-weight: 600; letter-spacing: 0.5px;">
+            <i class="ti ti-device-floppy fs-3"></i> Lưu thông tin nhân sự
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  let globalMembers = [];
+
+  // 1. TẢI DỮ LIỆU
+  async function loadMembers() {
+    if (window.currentUser && window.currentUser.role !== 'admin') {
+      const panel = document.getElementById('adminActionsPanel');
+      if(panel) panel.style.display = 'none';
+    }
+
+    const { data, error } = await window.sbClient.from('safe_members').select('*').order('created_at', { ascending: true });
+    if (error) { Swal.fire('Lỗi tải dữ liệu', error.message, 'error'); return; }
+    
+    globalMembers = data;
+    const tbody = document.getElementById('memberTableBody');
+    tbody.innerHTML = '';
+
+    data.forEach((member, index) => {
+      let timeStr = '<span class="text-muted">Chưa đăng nhập</span>';
+      if (member.last_login) {
+          const d = new Date(member.last_login);
+          timeStr = `<i class="ti ti-history text-muted me-1"></i> ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}, ${d.toLocaleDateString('vi-VN')}`;
+      }
+
+      const roleBadge = member.role === 'admin' ? 'ADMIN' : (member.role === 'manager' ? 'LEADER' : 'STAFF');
+      const statusBadge = member.is_active 
+        ? '<span style="color: #10b981; font-weight: 500;"><i class="ti ti-point-filled"></i> Đang hoạt động</span>' 
+        : '<span style="color: #ef4444; font-weight: 500;"><i class="ti ti-point-filled"></i> Bị khóa</span>';
+
+      const toggleBtn = member.is_active
+        ? `<button class="btn btn-sm btn-outline-warning p-2 px-3" onclick="toggleMemberStatus('${member.id}', true)"><i class="ti ti-lock me-1"></i> Khóa</button>`
+        : `<button class="btn btn-sm btn-outline-success p-2 px-3" onclick="toggleMemberStatus('${member.id}', false)"><i class="ti ti-lock-open me-1"></i> Mở khóa</button>`;
+
+      let actionColumn = '';
+      if (window.currentUser && window.currentUser.role === 'admin') {
+        actionColumn = `
+          <td class="text-center">
+            <div class="d-flex justify-content-center align-items-center gap-2">
+              <button class="btn btn-sm btn-outline-primary p-2 px-3" data-bs-toggle="modal" data-bs-target="#modal-member" onclick="openMemberModal('${member.id}')"><i class="ti ti-pencil"></i> Sửa</button>
+              ${toggleBtn}
+              <button class="btn btn-sm btn-outline-danger p-2 px-3" onclick="deleteMember('${member.id}')"><i class="ti ti-trash"></i> Xóa</button>
+            </div>
+          </td>
+        `;
+      }
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="text-center text-muted">${index + 1}</td>
+        <td>
+          <div class="d-flex align-items-center">
+            <span class="avatar avatar-sm avatar-brand me-2">${member.full_name.charAt(0)}</span>
+            <div>
+              <div class="font-weight-medium">${member.full_name}</div>
+            </div>
+          </div>
+        </td>
+        <td class="text-muted">${member.email}</td>
+        <td><span class="badge bg-green-lt fw-bold border border-success">${roleBadge}</span></td>
+        <td class="text-muted" style="font-size: 13px;">${timeStr}</td>
+        <td>${statusBadge}</td>
+        ${actionColumn}
+      `;
+      tbody.appendChild(tr);
+    });
+
+    if (window.currentUser && window.currentUser.role !== 'admin') {
+      document.querySelectorAll('.admin-only-col').forEach(col => col.style.display = 'none');
+    }
+  }
+
+  // 2. MỞ MODAL THÊM / SỬA
+  function openMemberModal(id = null) {
+    document.getElementById('memberForm').reset();
+    document.getElementById('memberId').value = '';
+    if (id) {
+      document.getElementById('modalTitleMember').innerHTML = '<i class="ti ti-edit me-2"></i> Cập nhật nhân sự';
+      const m = globalMembers.find(x => x.id === id);
+      document.getElementById('memberId').value = m.id;
+      document.getElementById('memFullName').value = m.full_name;
+      document.getElementById('memEmail').value = m.email;
+      document.getElementById('memPass').value = m.password;
+      document.getElementById('memRole').value = m.role;
+    } else {
+      document.getElementById('modalTitleMember').innerHTML = '<i class="ti ti-user-plus me-2"></i> Thêm nhân sự mới';
+    }
+  }
+
+  // 3. LƯU (THÊM HOẶC CẬP NHẬT)
+  async function saveMember() {
+    const btn = document.getElementById('btnSaveMember');
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang lưu...'; btn.disabled = true;
+    const id = document.getElementById('memberId').value;
+    const payload = {
+      full_name: document.getElementById('memFullName').value, 
+      email: document.getElementById('memEmail').value,
+      password: document.getElementById('memPass').value, 
+      role: document.getElementById('memRole').value
+    };
+    try {
+      if (id) await window.sbClient.from('members').update(payload).eq('id', id);
+      else { payload.is_active = true; await window.sbClient.from('members').insert([payload]); }
+      
+      document.getElementById('btnCloseMemberModal').click();
+      Swal.fire({ icon: 'success', title: 'Thành công', timer: 1500, showConfirmButton: false });
+      await loadMembers();
+    } catch (err) { Swal.fire('Lỗi', err.message, 'error'); }
+    finally { btn.innerHTML = '<i class="ti ti-device-floppy me-2"></i> Lưu dữ liệu'; btn.disabled = false; }
+  }
+
+  // 4. KHÓA TÀI KHOẢN
+  function toggleMemberStatus(id, active) {
+    Swal.fire({ title: 'Xác nhận?', text: active ? "Khóa tài khoản này?" : "Mở khóa tài khoản?", icon: 'warning', showCancelButton: true, confirmButtonText: 'Đồng ý' })
+    .then(async (res) => {
+      if (res.isConfirmed) {
+        await window.sbClient.from('members').update({ is_active: !active }).eq('id', id);
+        loadMembers();
+      }
+    });
+  }
+
+  // 5. XÓA TÀI KHOẢN
+  function deleteMember(id) {
+    Swal.fire({ title: 'Xóa nhân sự?', text: "Hành động này không thể hoàn tác!", icon: 'error', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Xóa vĩnh viễn' })
+    .then(async (res) => {
+      if (res.isConfirmed) {
+        await window.sbClient.from('members').delete().eq('id', id);
+        Swal.fire({ icon: 'success', title: 'Đã xóa', timer: 1500, showConfirmButton: false });
+        loadMembers();
+      }
+    });
+  }
+</script>
