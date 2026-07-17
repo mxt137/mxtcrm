@@ -183,6 +183,15 @@
       const isValid = await verifySystemAccess();
       if (!isValid) return; 
 
+      // --- BỔ SUNG XỬ LÝ UI: TỰ ĐỘNG ĐÓNG MENU TRÊN MOBILE ---
+      const sidebarMenu = document.getElementById('sidebar-menu');
+      const navbarToggler = document.querySelector('.navbar-toggler');
+      // Nếu màn hình nhỏ (mobile/tablet) và menu đang ở trạng thái mở ('show')
+      if (window.innerWidth < 992 && sidebarMenu && sidebarMenu.classList.contains('show')) {
+          navbarToggler.click(); // Giả lập click để đóng mượt mà kèm animation
+      }
+      // --------------------------------------------------------
+
       const moduleDiv = document.getElementById('module-' + pageId);
       
       // Nếu div rỗng -> Tiến hành tải file HTML module
