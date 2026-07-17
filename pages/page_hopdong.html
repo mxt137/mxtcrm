@@ -1,0 +1,453 @@
+<style>
+  .filter-bar { background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--tblr-border-color); }
+  .contract-code { font-weight: 700; color: #146654; font-size: 14px; }
+  .date-box { font-size: 12px; color: #475569; display: flex; align-items: center; gap: 4px; }
+  .val-text { font-weight: 600; color: #0f172a; }
+</style>
+
+<div class="page-header d-print-none mt-4">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <h2 class="page-title" style="color: var(--tblr-primary); font-weight: 700;">
+          <i class="ti ti-file-certificate me-2"></i> Quản lý Hợp đồng
+        </h2>
+        <div class="text-muted mt-1" style="font-size: 13px;">Theo dõi hợp đồng giao dịch, thời hạn thuê và doanh thu</div>
+      </div>
+      <div class="col-auto ms-auto d-print-none">
+        <button class="btn btn-brand d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modal-contract" onclick="openContractModal()">
+          <i class="ti ti-plus"></i> Lập Hợp Đồng Mới
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="container-xl">
+    
+    <div class="filter-bar row g-2">
+      <div class="col-md-4">
+        <select id="filterContractStatus" class="form-select" onchange="applyContractFilter()">
+          <option value="all">Tất cả Trạng thái</option>
+          <option value="Active">Đang hiệu lực</option>
+          <option value="Expiring">Sắp hết hạn (< 30 ngày)</option>
+          <option value="Expired">Đã hết hạn / Thanh lý</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <select id="filterContractSales" class="form-select" onchange="applyContractFilter()">
+          <option value="all">Tất cả Sales phụ trách</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <button class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2" onclick="resetContractFilter()">
+          <i class="ti ti-refresh"></i> Tải lại danh sách
+        </button>
+      </div>
+    </div>
+
+    <div class="card" style="border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); overflow: hidden;">
+      <div class="table-responsive">
+        <table class="table table-vcenter card-table table-hover text-nowrap">
+          <thead>
+            <tr>
+              <th class="w-1 text-center">STT</th>
+              <th>MÃ SẢN PHẨM</th>
+              <th>KHÁCH HÀNG (TENANT)</th>
+              <th>THỜI HẠN (START - END)</th>
+              <th>GIÁ TRỊ / KỲ</th>
+              <th>TRẠNG THÁI</th>
+              <th class="text-center">THAO TÁC</th>
+            </tr>
+          </thead>
+          <tbody id="contractTableBody">
+            <tr><td colspan="7" class="text-center text-muted py-4">Đang tải dữ liệu từ máy chủ...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="paginationContractControls" class="card-footer d-flex align-items-center" style="background: #fff;"></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="modal modal-blur fade" id="modal-contract" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content" style="border-radius: 12px;">
+      <div class="modal-header" style="background: #146654; color: white;">
+        <h5 class="modal-title" id="modalTitleContract" style="font-weight: 700;">Khởi tạo Hợp Đồng</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" id="btnCloseContractModal"></button>
+      </div>
+      <form id="contractForm" onsubmit="event.preventDefault(); saveContract();">
+        <div class="modal-body p-4">
+          <input type="hidden" id="contractId">
+          
+          <div class="mb-3">
+            <h3 class="fw-bold" style="color: #146654; font-size: 15px; letter-spacing: 0.3px;"><i class="ti ti-handshake me-2"></i>Đối Tượng Giao Dịch</h3>
+            <hr class="mt-2 mb-0" style="border-color: #cbd5e1; opacity: 0.5;">
+          </div>
+
+          <div class="row gx-3">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-medium required" style="font-size: 13px; color: #475569;">Sản phẩm Giao dịch</label>
+              <div class="input-icon">
+                <span class="input-icon-addon"><i class="ti ti-home-check text-success"></i></span>
+                <select id="ctrProperty" class="form-select form-select-lg fs-4" required style="border-radius: 8px; border-color: #cbd5e1; font-weight: 500;">
+                  <option value="">-- Chọn rổ hàng --</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-medium required" style="font-size: 13px; color: #475569;">Khách hàng (Người thuê/Mua)</label>
+              <div class="input-icon">
+                <span class="input-icon-addon"><i class="ti ti-user-check text-primary"></i></span>
+                <select id="ctrTenant" class="form-select form-select-lg fs-4" required style="border-radius: 8px; border-color: #cbd5e1; font-weight: 500;">
+                  <option value="">-- Chọn khách hàng --</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3 mt-4">
+            <h3 class="fw-bold" style="color: #146654; font-size: 15px; letter-spacing: 0.3px;"><i class="ti ti-calendar-time me-2"></i>Thời Hạn & Giá Trị Hợp Đồng</h3>
+            <hr class="mt-2 mb-0" style="border-color: #cbd5e1; opacity: 0.5;">
+          </div>
+
+          <div class="row gx-3">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-medium required" style="font-size: 13px; color: #475569;">Ngày bắt đầu</label>
+              <div class="input-icon">
+                <span class="input-icon-addon"><i class="ti ti-calendar-event text-muted"></i></span>
+                <input type="date" id="ctrStart" class="form-control form-control-lg fs-4" required style="border-radius: 8px; border-color: #cbd5e1;">
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-medium" style="font-size: 13px; color: #475569;">Ngày kết thúc (Dự kiến)</label>
+              <div class="input-icon">
+                <span class="input-icon-addon"><i class="ti ti-calendar-x text-muted"></i></span>
+                <input type="date" id="ctrEnd" class="form-control form-control-lg fs-4" style="border-radius: 8px; border-color: #cbd5e1;">
+              </div>
+            </div>
+          </div>
+
+          <div class="row gx-3">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-medium required" style="font-size: 13px; color: #475569;">Giá trị Hợp đồng</label>
+              <div class="input-icon">
+                <span class="input-icon-addon"><i class="ti ti-currency-dong text-danger fw-bold" style="font-size: 15px;"></i></span>
+                <input type="text" id="ctrValueDisplay" class="form-control form-control-lg fs-4 fw-bold text-danger" required placeholder="Ví dụ: 10,000,000đ" oninput="formatCurrencyInput(this)" style="border-radius: 8px; border-color: #cbd5e1; padding-left: 35px;">
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-medium required" style="font-size: 13px; color: #475569;">Trạng thái HĐ</label>
+              <div class="input-icon">
+                <span class="input-icon-addon"><i class="ti ti-shield-check text-primary"></i></span>
+                <select id="ctrStatus" class="form-select form-select-lg fs-4 fw-medium" style="border-radius: 8px; border-color: #cbd5e1;">
+                  <option value="Active" style="color: #2fb344; font-weight: bold;">🟢 Đang hiệu lực</option>
+                  <option value="Expired" style="color: #d63384;">🔴 Đã thanh lý / Hết hạn</option>
+                  <option value="Canceled" style="color: #6c7a89;">⚫ Đã hủy</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3 mt-4">
+            <h3 class="fw-bold" style="color: #146654; font-size: 15px; letter-spacing: 0.3px;"><i class="ti ti-briefcase text-muted me-2"></i>Phụ Trách & Điều Khoản Phụ</h3>
+            <hr class="mt-2 mb-3" style="border-color: #cbd5e1; opacity: 0.5;">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-medium required" style="font-size: 13px; color: #475569;">Sales Phụ trách</label>
+            <div class="input-icon">
+              <span class="input-icon-addon"><i class="ti ti-headset text-muted"></i></span>
+              <select id="ctrSales" class="form-select form-select-lg fs-4" required style="border-radius: 8px; border-color: #cbd5e1; font-weight: 500;"></select>
+            </div>
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label fw-medium text-muted" style="font-size: 12px;">Ghi chú Hợp đồng (Tiến độ thanh toán, điều khoản phạt...)</label>
+            <textarea id="ctrNotes" class="form-control" rows="3" placeholder="Ghi chú chi tiết về tiến độ cọc, ngày thanh toán hàng tháng, hoặc các điều khoản vi phạm..." style="border-radius: 8px; resize: none; background: #f8fafc; border: 1px dashed #94a3b8; padding: 14px; color: #1e293b; font-size: 13.5px;"></textarea>
+          </div>
+
+        </div>
+
+        <div class="modal-footer d-flex align-items-center" style="background: #f1f5f9; border-radius: 0 0 12px 12px; border-top: 1px solid #e2e8f0; padding: 16px 24px;">
+          <button type="button" class="btn btn-link link-secondary fw-medium text-decoration-none" data-bs-dismiss="modal">Hủy bỏ</button>
+          
+          <button type="submit" class="btn btn-primary ms-auto d-flex align-items-center gap-2" id="btnSaveContract" style="background: linear-gradient(135deg, #146654 0%, #0d4639 100%); border: none; box-shadow: 0 4px 12px rgba(20, 102, 84, 0.25); border-radius: 8px; padding: 10px 24px; font-weight: 600; letter-spacing: 0.5px;">
+            <i class="ti ti-device-floppy fs-3"></i> Lưu hợp đồng
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  let contractCurrentPage = 1;
+  const contractItemsPerPage = 20; 
+  let contractTotalItems = 0;
+
+  let listProps = [];
+  let listTenants = [];
+  let listSalesCtr = [];
+
+  // HÀM FORMAT TIỀN TỰ ĐỘNG KHI GÕ
+  function formatCurrencyInput(el) {
+    let value = el.value.replace(/\D/g, ""); // Xóa bỏ ký tự không phải là số
+    if (value === "") { el.value = ""; return; }
+    
+    // Định dạng thêm dấu phẩy ngăn cách hàng nghìn
+    let formatted = new Intl.NumberFormat('en-US').format(value);
+    el.value = formatted + "đ";
+  }
+
+  // 1. TẢI DỮ LIỆU ĐỔ VÀO FORM MỘT LẦN KHI LOAD MODULE
+  async function loadContractDependencies() {
+    const { data: sData } = await window.sbClient.from('members').select('id, full_name, role').eq('is_active', true);
+    if (sData) {
+      listSalesCtr = sData;
+      let fSales = '<option value="all">Tất cả Sales phụ trách</option>';
+      let mSales = '<option value="">-- Chọn Sales --</option>';
+      sData.forEach(s => {
+        fSales += `<option value="${s.id}">${s.full_name}</option>`;
+        mSales += `<option value="${s.id}">${s.full_name}</option>`;
+      });
+      document.getElementById('filterContractSales').innerHTML = fSales;
+      document.getElementById('ctrSales').innerHTML = mSales;
+    }
+
+    const { data: pData } = await window.sbClient.from('properties').select('id, property_code');
+    if (pData) {
+      listProps = pData;
+      let pOptions = '<option value="">-- Chọn Sản phẩm --</option>';
+      pData.forEach(p => pOptions += `<option value="${p.id}">${p.property_code}</option>`);
+      document.getElementById('ctrProperty').innerHTML = pOptions;
+    }
+
+    const { data: cData } = await window.sbClient.from('customers').select('id, full_name, phone').eq('customer_group', 'Tenant');
+    if (cData) {
+      listTenants = cData;
+      let cOptions = '<option value="">-- Chọn Người Thuê --</option>';
+      cData.forEach(c => cOptions += `<option value="${c.id}">${c.full_name} (${c.phone})</option>`);
+      document.getElementById('ctrTenant').innerHTML = cOptions;
+    }
+  }
+
+  // 2. TẢI DANH SÁCH HỢP ĐỒNG
+  async function loadContracts() {
+    if (listSalesCtr.length === 0) await loadContractDependencies();
+
+    document.getElementById('contractTableBody').innerHTML = '<tr><td colspan="7" class="text-center py-4"><span class="spinner-border spinner-border-sm me-2"></span> Đang tải dữ liệu...</td></tr>';
+    
+    const role = window.currentUser.role;
+    const myId = window.currentUser.id;
+    const from = (contractCurrentPage - 1) * contractItemsPerPage;
+    const to = from + contractItemsPerPage - 1;
+
+    let query = window.sbClient.from('contracts').select(`
+      *,
+      property:properties(property_code),
+      tenant:customers(full_name, phone),
+      sales:members(full_name)
+    `, { count: 'exact' });
+
+    if (role === 'sales') {
+      query = query.eq('sales_id', myId);
+    } else if (role === 'manager') {
+      const adminIds = listSalesCtr.filter(m => m.role === 'admin').map(m => m.id);
+      if (adminIds.length > 0) query = query.not('sales_id', 'in', `(${adminIds.join(',')})`);
+    }
+
+    const status = document.getElementById('filterContractStatus').value;
+    const salesId = document.getElementById('filterContractSales').value;
+
+    if (status === 'Active') query = query.eq('status', 'Active');
+    else if (status === 'Expired') query = query.in('status', ['Expired', 'Canceled']);
+    
+    if (salesId !== 'all') query = query.eq('sales_id', salesId);
+
+    const { data, error, count } = await query.order('created_at', { ascending: false }).range(from, to);
+    if (error) { Swal.fire('Lỗi', error.message, 'error'); return; }
+
+    let finalData = data;
+    
+    if (status === 'Expiring') {
+      const today = new Date();
+      const thirtyDaysLater = new Date(today.getTime() + (30 * 24 * 60 * 60 * 1000));
+      finalData = data.filter(ctr => {
+        if (!ctr.end_date || ctr.status !== 'Active') return false;
+        const eDate = new Date(ctr.end_date);
+        return eDate >= today && eDate <= thirtyDaysLater;
+      });
+    }
+
+    contractTotalItems = count || 0;
+    renderContractTable(finalData);
+    renderContractPagination();
+  }
+
+  // 3. RENDER BẢNG HỢP ĐỒNG
+  function renderContractTable(dataList) {
+    const tbody = document.getElementById('contractTableBody');
+    tbody.innerHTML = '';
+    if(dataList.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4">Không tìm thấy hợp đồng phù hợp.</td></tr>'; return;
+    }
+
+    const today = new Date();
+
+    dataList.forEach((ctr, index) => {
+      const propCode = ctr.property ? ctr.property.property_code : '<span class="text-danger">Đã xóa SP</span>';
+      const tenantName = ctr.tenant ? `<span class="fw-medium">${ctr.tenant.full_name}</span><br><span class="text-muted" style="font-size:11px">${ctr.tenant.phone}</span>` : '-';
+      
+      const sDate = new Date(ctr.start_date).toLocaleDateString('vi-VN');
+      const eDate = ctr.end_date ? new Date(ctr.end_date).toLocaleDateString('vi-VN') : 'Vô thời hạn';
+      
+      let statusHtml = '';
+      if (ctr.status === 'Active') {
+        if (ctr.end_date) {
+           const endDateObj = new Date(ctr.end_date);
+           const diffTime = Math.abs(endDateObj - today);
+           const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+           if (endDateObj < today) {
+             statusHtml = '<span class="badge bg-red-lt fw-bold border border-danger">Đã quá hạn</span>';
+           } else if (diffDays <= 30) {
+             statusHtml = `<span class="badge bg-orange-lt fw-bold border border-warning">Sắp hết hạn (${diffDays} ngày)</span>`;
+           } else {
+             statusHtml = '<span class="badge bg-green-lt"><i class="ti ti-check me-1"></i> Đang hiệu lực</span>';
+           }
+        } else {
+           statusHtml = '<span class="badge bg-green-lt"><i class="ti ti-check me-1"></i> Đang hiệu lực</span>';
+        }
+      } else if (ctr.status === 'Expired') {
+        statusHtml = '<span class="badge bg-secondary-lt">Đã thanh lý</span>';
+      } else {
+        statusHtml = '<span class="badge bg-secondary-lt">Đã hủy</span>';
+      }
+
+      // Đổi đuôi định dạng hiển thị thành đ chuẩn Việt Nam
+      const formattedVal = new Intl.NumberFormat('vi-VN').format(ctr.contract_value || 0) + "đ";
+      const stt = (contractCurrentPage - 1) * contractItemsPerPage + index + 1;
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="text-center text-muted">${stt}</td>
+        <td><div class="contract-code">${propCode}</div></td>
+        <td>${tenantName}</td>
+        <td>
+          <div class="date-box"><i class="ti ti-calendar-event text-success"></i> ${sDate}</div>
+          <div class="date-box mt-1"><i class="ti ti-calendar-x text-danger"></i> ${eDate}</div>
+        </td>
+        <td class="val-text">${formattedVal}</td>
+        <td>${statusHtml}</td>
+        <td class="text-center">
+          <div class="d-flex justify-content-center align-items-center gap-2">
+            <button class="btn btn-sm btn-outline-primary p-2 px-3 me-1" data-bs-toggle="modal" data-bs-target="#modal-contract" onclick="openContractModal('${ctr.id}')"><i class="ti ti-pencil"></i> Sửa</button>
+            ${window.currentUser.role === 'admin' ? `<button class="btn btn-sm btn-outline-danger p-2 px-3" onclick="deleteContract('${ctr.id}')"><i class="ti ti-trash"></i></button>` : ''}
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderContractPagination() {
+    const totalPages = Math.ceil(contractTotalItems / contractItemsPerPage) || 1;
+    const paginationEl = document.getElementById('paginationContractControls');
+    if (contractTotalItems === 0) { paginationEl.innerHTML = ''; return; }
+    const fromCount = (contractCurrentPage - 1) * contractItemsPerPage + 1;
+    const toCount = Math.min(contractCurrentPage * contractItemsPerPage, contractTotalItems);
+    
+    paginationEl.innerHTML = `
+      <span class="text-muted">Hiển thị <strong>${fromCount}</strong> - <strong>${toCount}</strong> / <strong>${contractTotalItems}</strong> HĐ</span>
+      <div class="btn-group ms-auto">
+        <button class="btn btn-sm btn-outline-secondary" onclick="changeContractPage(-1)" ${contractCurrentPage === 1 ? 'disabled' : ''}><i class="ti ti-chevron-left"></i> Trước</button>
+        <button class="btn btn-sm btn-outline-secondary" disabled style="color: var(--tblr-primary); font-weight: bold;">Trang ${contractCurrentPage} / ${totalPages}</button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="changeContractPage(1)" ${contractCurrentPage === totalPages ? 'disabled' : ''}>Sau <i class="ti ti-chevron-right"></i></button>
+      </div>
+    `;
+  }
+
+  function changeContractPage(direction) { contractCurrentPage += direction; loadContracts(); }
+  function applyContractFilter() { contractCurrentPage = 1; loadContracts(); }
+  function resetContractFilter() { document.getElementById('filterContractStatus').value = 'all'; document.getElementById('filterContractSales').value = 'all'; contractCurrentPage = 1; loadContracts(); }
+
+  // 4. MỞ MODAL THÊM / SỬA HỢP ĐỒNG
+  async function openContractModal(id = null) {
+    document.getElementById('contractForm').reset();
+    document.getElementById('contractId').value = '';
+    document.getElementById('ctrSales').disabled = false;
+    
+    if (window.currentUser) {
+      document.getElementById('ctrSales').value = window.currentUser.id;
+      if(window.currentUser.role === 'sales') document.getElementById('ctrSales').disabled = true;
+    }
+
+    if (id) {
+      document.getElementById('modalTitleContract').innerHTML = '<i class="ti ti-edit me-2"></i> Cập nhật Hợp đồng';
+      const { data: ctr } = await window.sbClient.from('contracts').select('*').eq('id', id).single();
+      if(ctr) {
+        document.getElementById('contractId').value = ctr.id;
+        document.getElementById('ctrProperty').value = ctr.property_id;
+        document.getElementById('ctrTenant').value = ctr.tenant_id;
+        document.getElementById('ctrStart').value = ctr.start_date;
+        document.getElementById('ctrEnd').value = ctr.end_date || '';
+        document.getElementById('ctrStatus').value = ctr.status;
+        document.getElementById('ctrSales').value = ctr.sales_id;
+        document.getElementById('ctrNotes').value = ctr.notes || '';
+        
+        // Đưa giá trị số vào ô hiển thị định dạng phẩy
+        let valInput = document.getElementById('ctrValueDisplay');
+        valInput.value = ctr.contract_value;
+        formatCurrencyInput(valInput);
+      }
+    } else {
+      document.getElementById('modalTitleContract').innerHTML = '<i class="ti ti-plus me-2"></i> Khởi tạo Hợp Đồng Mới';
+    }
+  }
+
+  // 5. LƯU DỮ LIỆU
+  async function saveContract() {
+    const btn = document.getElementById('btnSaveContract');
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang xử lý...'; btn.disabled = true;
+    
+    const id = document.getElementById('contractId').value;
+    
+    // Khử định dạng chữ để lấy số nguyên thuần túy đẩy lên Supabase
+    let rawNumber = document.getElementById('ctrValueDisplay').value.replace(/\D/g, "");
+
+    const payload = {
+      property_id: document.getElementById('ctrProperty').value,
+      tenant_id: document.getElementById('ctrTenant').value,
+      start_date: document.getElementById('ctrStart').value,
+      end_date: document.getElementById('ctrEnd').value || null,
+      contract_value: Number(rawNumber), // Ép về kiểu Number chuẩn dữ liệu gốc
+      status: document.getElementById('ctrStatus').value,
+      sales_id: document.getElementById('ctrSales').value,
+      notes: document.getElementById('ctrNotes').value || null
+    };
+
+    try {
+      if (id) await window.sbClient.from('contracts').update(payload).eq('id', id);
+      else await window.sbClient.from('contracts').insert([payload]);
+      
+      document.getElementById('btnCloseContractModal').click();
+      Swal.fire({ icon: 'success', title: 'Thành công', timer: 1500, showConfirmButton: false });
+      await loadContracts();
+    } catch (err) { Swal.fire({ icon: 'error', title: 'Lỗi', text: err.message, confirmButtonColor: '#146654' }); } 
+    finally { btn.innerHTML = '<i class="ti ti-device-floppy me-2"></i> Lưu hợp đồng'; btn.disabled = false; }
+  }
+
+  function deleteContract(id) {
+    Swal.fire({ title: 'Xóa hợp đồng này?', text: "Hành động này không thể hoàn tác!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Xóa vĩnh viễn' })
+    .then(async (res) => {
+      if (res.isConfirmed) {
+        await window.sbClient.from('contracts').delete().eq('id', id);
+        Swal.fire({ icon: 'success', title: 'Đã xóa', timer: 1500, showConfirmButton: false });
+        loadContracts();
+      }
+    });
+  }
+</script>
